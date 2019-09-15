@@ -1,0 +1,29 @@
+---
+# Designates the scale at which to check Facility IDs
+mode:
+  scan_by_user: True
+  scan_by_dset: False
+  scan_by_feat: False
+
+# Designates data owners, and whether they approved versioned edits
+users:
+  UTIL: True
+  TRANS: True
+  PW: True
+  PARKS: True
+
+# Designates which datasets grouped by owner
+dsets:
+  UTIL:
+    WATERDISTRIBUTION
+    STORMWATER
+    SEWER
+
+# Designates features, grouped by owner, then dataset
+feats:
+  UTIL:
+    WATERDISTRIBUTION:
+      wFitting
+      wHydrant
+    Floodplains
+    Greenways
