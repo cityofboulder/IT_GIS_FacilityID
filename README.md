@@ -26,10 +26,10 @@ conda create --name facilityid_env --clone arcgispro-py3
 
 #### Running the Script
 
-In the Command Prompt, change directories to the parent folder of the facilityid download:
+In the Command Prompt, change directories to the facilityid download:
 
 ```
-cd /d parent\of\wherever\you\just\downloaded\this\package
+cd /d path\to\facilityid
 ```
 
 Now, still in Command Prompt, enter into the conda environment created especially for this package:
