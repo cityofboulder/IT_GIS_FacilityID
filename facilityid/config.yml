@@ -12,14 +12,14 @@ users:
   PW: True
   PARKS: True
 
-# Designates which datasets grouped by owner
+# Update these if scan_by_dset is True
 dsets:
   UTIL:
     WATERDISTRIBUTION
     STORMWATER
     SEWER
 
-# Designates features, grouped by owner, then dataset
+# Update these if scan_by_feat is True
 feats:
   UTIL:
     WATERDISTRIBUTION:
@@ -27,3 +27,25 @@ feats:
       wHydrant
     Floodplains
     Greenways
+
+# Defines actions required per feature to enable versioned editing
+checklist:
+  0 - FEATURE CLASS: []
+  1 - PREFIX: []
+  2 - CHECK VERSIONED EDITS: []
+  3 - ENABLE GLOBALID: []
+  4 - REGISTER AS VERSIONED: []
+  5 - TURN ON EDITOR TRACKING: []
+  6 - RE-ENABLE ACCESS TO GIS USER: []
+  7 - GRANT GISSCR USER FULL PRIVILEGES: []
+  8 - FILL IN FACILITY ID VALUES: []
+
+# Categorizes number of edits made to individual features
+count:
+  0 - FEATURE CLASS: []
+  1 - VERSIONED EDITS: []
+  2 - NULL VALUES: []
+  3 - DUPLICATE IDS: []
+  4 - INCORRECT PREFIXES: []
+  5 - LEADING ZEROS: []
+  6 - DUPLICATE GEOMS: []
