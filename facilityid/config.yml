@@ -6,8 +6,8 @@ mode:
   scan_by_feat: False
 
 sde:
-  read: r"S:\GIS\Share\DatabaseConnections\gis on gisprod2.sde"
-  edit: r"S:\PW\PWShare\GIS\Scripts\dbconnections\gisscr on gisprod2.sde"
+  read: "S:\\GIS\\Share\\DatabaseConnections\\gis on gisprod2.sde"
+  edit: "S:\\PW\\PWShare\\GIS\\Scripts\\dbconnections\\gisscr on gisprod2.sde"
 
 # Designates data owners, and whether they approved versioned edits
 users:
