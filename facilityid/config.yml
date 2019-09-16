@@ -1,10 +1,14 @@
 ---
+# Designates whether edits should be posted by the script
+post_edits: False
+
 # Designates the scale at which to check Facility IDs
 mode:
   scan_by_user: True
   scan_by_dset: False
   scan_by_feat: False
 
+# Paths to sde connections
 sde:
   read: "S:\\GIS\\Share\\DatabaseConnections\\gis on gisprod2.sde"
   edit: "S:\\PW\\PWShare\\GIS\\Scripts\\dbconnections\\gisscr on gisprod2.sde"
