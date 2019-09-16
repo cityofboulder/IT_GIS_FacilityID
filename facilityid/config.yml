@@ -19,18 +19,18 @@ users:
 # Update these if scan_by_dset is True
 dsets:
   UTIL:
-    WATERDISTRIBUTION
-    STORMWATER
-    SEWER
+    "WATERDISTRIBUTION"
+    "STORMWATER"
+    "SEWER"
 
 # Update these if scan_by_feat is True
 feats:
   UTIL:
     WATERDISTRIBUTION:
-      wFitting
-      wHydrant
-    Floodplains
-    Greenways
+      "wFitting"
+      "wHydrant"
+    "Floodplains"
+    "Greenways"
 
 # Defines actions required per feature to enable versioned editing
 checklist:
