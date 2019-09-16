@@ -8,4 +8,7 @@ logging.basicConfig(filename='app.log',
 
 
 if __name__ == "__main__":
-    app.main()
+    try:
+        app.main()
+    except Exception:
+        logging.critical("Something prevented the app from running")
