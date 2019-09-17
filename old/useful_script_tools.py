@@ -14,8 +14,6 @@ import itertools
 import openpyxl as pyxl
 import pandas as pd
 import datetime
-import sys
-import subprocess
 import os
 from os import path
 
@@ -257,59 +255,3 @@ def excel_to_df(excel_file = None, headers = False, index = False):
         result[sheet_name] = df
 
     return result
-
-
-def pip_install(package):
-    """ Installs a package to the system directory
-    
-    :param package: the name of the package to install.
-    """
-    subprocess.call([sys.executable, "-m", "pip", "install", package])
-
-
-#def dependencies(root = os.getcwd()):
-#    """ Makes sure package dependencies are installed to the USER_BASE so that 
-#    a given project is more shareable.
-#    
-#    :param root: The root file path (usually the .py location) of the project. 
-#    The default of this parameter is the cwd of the file being run.
-#    """
-#    # install pipenv
-#    subprocess.call([sys.executable, "-m", "pip", "install", "--user", "pipenv"])
-#    # change the directory to the project path
-#    subprocess.call([sys.executable, "cd", "/d", root])
-#    # install requests and create a Pipfile in the project directory
-#    subprocess.call([sys.executable, "pipenv", "install", "requests"])
-##    # install the packages needed for the script
-##    subprocess.call([sys.executable, "pipenv", "run", "python"])
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
