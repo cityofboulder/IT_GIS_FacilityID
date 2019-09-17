@@ -2,6 +2,8 @@
 # TODO: transfer items from personal modules into a project utilities module
 # TODO: figure out how to download the boulder_gis package into conda env
 import json
+import getpass
+from datetime import datetime
 
 """Read in config.json and assign values to variables"""
 with open('config.json') as config_file:
@@ -23,6 +25,14 @@ feats_to_check = configs["feats"] if "scan_by_feat" in scan_mode else None
 checklist_row = configs["checklist"]
 # Define what a row in the edit summary looks like
 edit_counts_row = configs["count"]
+
+"""Define variables that are constant throughout the script"""
+# User who initiated the script
+username = getpass.getuser()
+# Day and time script was run
+start_date_string = datetime.now().strftime("%Y%m%d")
+start_time_string = datetime.now().strftime('%H%M')
+
 
 
 def main():
