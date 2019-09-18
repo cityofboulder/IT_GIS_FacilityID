@@ -15,27 +15,19 @@
     "PW": true,
     "PARKS": true
   },
-  "dsets": {
-    "UTIL": [
-      "WATERDISTRIBUTION",
-      "STORMWATER",
-      "SEWER"
-    ],
-    "PW": [
-      "PWAREA"
-    ]
-  },
-  "feats:": {
-    "UTIL": {
-      "WATERDISTRIBUTION": [
-        "wFitting",
-        "wHydrant"
-      ],
-      "NONE": [
-        "Floodplains",
-        "Greenways"
-      ]
-    }
+  "dsets": [
+    "WATERDISTRIBUTION",
+    "STORMWATER",
+    "SEWER",
+    "PWAREA"
+  ],
+  "feats:": [
+    "wFitting",
+    "wHydrant",
+    "Floodplains",
+    "Greenways",
+    "swSystemValve"
+  ]
   },
   "checklist": {
       "0 - FEATURE CLASS": "",
