@@ -5,6 +5,8 @@ import json
 import getpass
 from datetime import datetime
 
+from .utils import management as mgmt
+
 """Read in config.json and assign values to variables"""
 with open('config.json') as config_file:
     configs = json.load(config_file)
@@ -34,10 +36,9 @@ start_date_string = datetime.now().strftime("%Y%m%d")
 start_time_string = datetime.now().strftime('%H%M')
 
 
-
 def main():
-    """
-    The main function of the facility id checker.
+    """ The main function of the facility id checker.
     :return:
     """
-    pass
+    # Delete all existing Facility ID versions
+    mgmt.delete_facilityid_versions(edit_connection)
