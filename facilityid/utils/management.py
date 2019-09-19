@@ -9,11 +9,10 @@ aprx_location = "./EditFacilityID.aprx"
 
 
 def find_in_sde(sde_path: str = None, *args) -> list:
-    """ Finds all possible feature classes within the sde connection provided,
-    based on a list of pattern matches. For example, the requester might only
-    want to find the path of feature classes that contain "wF", "sw", and "Flood".
-    If no patterns are provided, the function will return the path of everything in
-    SDE.
+    """ Finds all possible feature classes within the sde connection provided based on a list of pattern matches, and
+    returns a list representing that file path broken into [sde, dataset (if it exists), feature class]. For example,
+    the requester might only want to find the path of feature classes that contain "wF", "sw", and "Flood". If no
+    patterns are provided, the function will return the path of everything in SDE.
 
     :param sde_path: The file path to the sde connection file
     :param args: A list of optional strings to filter the data
