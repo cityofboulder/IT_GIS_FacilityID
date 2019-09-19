@@ -1,7 +1,7 @@
 import os
-from arcpy import da
-from arcpy import mp
-from arcpy import DeleteVersion_management
+from arcpy.da import Walk
+from arcpy.mp import ArcGISProject
+from arcpy import DeleteVersion_management, ListVersions
 
 
 # Define globals specific to these functions
@@ -18,8 +18,8 @@ def find_in_sde(sde_path: str = None, *args) -> list:
     :param args: A list of optional strings to filter the data
     :return: A list consisting of [root_directory, dataset, feature_name]
     """
-    walk_object = Walk(sde_path, ['FeatureDataset', 'FeatureClass'])
-    for directory, folders, files in walk_object:
+    walker = Walk(sde_path, ['FeatureDataset', 'FeatureClass'])
+    for directory, folders, files in walker:
         for f in files:
             if args and any(arg in f for arg in args):
                 if directory.endswith(".sde"):
@@ -28,7 +28,7 @@ def find_in_sde(sde_path: str = None, *args) -> list:
                     dataset = directory.split(os.sep).pop()
                     item = [directory[:-(1 + len(dataset))], dataset, f]
                 yield item
-    del walk_object
+    del walker
 
 
 def delete_facilityid_versions(connection: str = None) -> None:
@@ -37,7 +37,7 @@ def delete_facilityid_versions(connection: str = None) -> None:
     :param connection: location of the sde connection file
     :return: None
     """
-    del_versions = [v.name for v in da.ListVersions(connection) if "FacilityID" in v.name]
+    del_versions = [v for v in ListVersions(connection) if "FacilityID" in v]
     for d in del_versions:
         DeleteVersion_management(connection, d)
 
@@ -52,7 +52,7 @@ def add_layer_to_map(feature_class_name: str = None) -> None:
     :return:
     """
     user, fc = feature_class_name.split(".")
-    aprx = mp.ArcGISProject(aprx_location)
+    aprx = ArcGISProject(aprx_location)
     user_map = aprx.listMaps("%s" % user)[0]
-    user_map.addDataFromPath() # TODO: add data from the gisscr user
+    user_map.addDataFromPath()  # TODO: add data from the gisscr user
     aprx.save()
