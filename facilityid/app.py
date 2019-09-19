@@ -12,17 +12,19 @@ with open('config.json') as config_file:
     configs = json.load(config_file)
 # Boolean for scripted post control
 post_control = configs["post_edits"]
-# Tags designating how to check IDs
-scan_mode = [k for k, v in configs["mode"].items() if v]
 # SDE database connection file locations
 read_connection = configs["sde"]["read"]
 edit_connection = configs["sde"]["edit"]
+# Tags designating how to check IDs
+scan_mode = [k for k, v in configs["mode"].items() if v]
 # Designate which users to check IDs for
-users_to_check = configs["users"] if "scan_by_user" in scan_mode else None
+users_to_check = configs["users"] if "scan_by_user" in scan_mode else False
 # Designate which data sets to check IDs for
-dsets_to_check = configs["dsets"] if "scan_by_dset" in scan_mode else None
+dsets_to_check = configs["dsets"] if "scan_by_dset" in scan_mode else False
 # Designate which features to check IDs for
-feats_to_check = configs["feats"] if "scan_by_feat" in scan_mode else None
+feats_to_check = configs["feats"] if "scan_by_feat" in scan_mode else False
+# Combines all filter elements into one list
+filters = users_to_check + dsets_to_check + feats_to_check
 # Define what a row in the sde checklist looks like
 checklist_row = configs["checklist"]
 # Define what a row in the edit summary looks like
