@@ -1,4 +1,4 @@
-from arcpy import ListFields, ExecuteError, GetCount_management
+from arcpy import ListFields, ExecuteError, GetCount_management, Describe
 from os import path
 
 
@@ -7,8 +7,13 @@ class FacilityID:
     Describe object in arcpy."""
     def __init__(self, iterator_path):
         self.full_path = path.join(*iterator_path)
+        self._desc = Describe(self.full_path)
         self.fields = [f.name for f in ListFields(self.full_path) if not f.required]
         self.prefix = self.find_prefix()
+
+    def __getattr__(self, item):
+        """Pass any other attribute or method calls through to the underlying Describe object"""
+        return getattr(self._desc, item)
 
     def has_records(self):
         """Determines if there are any records in the feature class to analyze."""
