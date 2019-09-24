@@ -23,10 +23,10 @@ def find_in_sde(sde_path: str = None, *args) -> list:
         for f in files:
             if args and any(arg in f for arg in args):
                 if directory.endswith(".sde"):
-                    item = [directory, None, f]
+                    item = (directory, f)
                 else:
                     dataset = directory.split(os.sep).pop()
-                    item = [directory[:-(1 + len(dataset))], dataset, f]
+                    item = (directory[:-(1 + len(dataset))], dataset, f)
                 yield item
     del walker
 
