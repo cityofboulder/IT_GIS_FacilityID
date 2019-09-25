@@ -1,4 +1,4 @@
-from arcpy import ListFields, ExecuteError, GetCount_management, Describe
+from arcpy import Describe, ExecuteError, GetCount_management, ListFields
 from os import path
 
 
@@ -36,3 +36,5 @@ class FacilityID:
         """Determines the prefix of the feature class based on the most prevalent occurrence."""
         # TODO: fill in code
         return True
+
+    # TODO: Add a function that converts each row of the fc to a dict {"GLOBALID": , "FACILITYID": , "CREATED": , "EDITED": }
