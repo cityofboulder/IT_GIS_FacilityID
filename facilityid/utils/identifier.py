@@ -1,11 +1,12 @@
-from arcpy import Describe, ExecuteError, GetCount_management, ListFields
+from arcpy import ArcSDESQLExecute, Describe, ExecuteError, GetCount_management, ListFields
 from os import path
 
 
-class FacilityID:
+class Identifier(ArcSDESQLExecute):
     """A class intended to deal with the specifics of controlling for the quality of Facility IDs. This builds upon the
     Describe object in arcpy."""
     def __init__(self, iterator_path):
+        super().__init__()  # Initialize the super-class just to be explicit
         self.full_path = path.join(*iterator_path)
         self._desc = Describe(self.full_path)
         self.fields = [f.name for f in ListFields(self.full_path) if not f.required]
