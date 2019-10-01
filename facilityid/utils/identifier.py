@@ -3,12 +3,12 @@ from arcpy.da import SearchCursor
 from os import path
 
 
-class Identifier(ArcSDESQLExecute):
+class Identifier:
     """A class intended to deal with the specifics of controlling for the quality of Facility IDs. This builds upon the
     Describe object in arcpy."""
     def __init__(self, iterator_path):
-        super().__init__()  # Initialize the super-class just to be explicit
         self.full_path = path.join(*iterator_path)
+        self.owner, self.name = iterator_path[-1].split(".")
         self._desc = Describe(self.full_path)
         self.fields = [f.name for f in ListFields(self.full_path) if not f.required]
         self.prefix = self.find_prefix()
@@ -65,3 +65,21 @@ class Identifier(ArcSDESQLExecute):
             for row in search:
                 row_list.append({fields[i]: row[i] for i in range(len(row))})
         return row_list
+
+    def gisscr_can_edit(self, edit_connection):
+        """Reveals if the feature class is editable through the GISSCR connection.
+
+        :param edit_connection: File path to a gisscr SDE connection
+        :return: Boolean
+        """
+        query = """SELECT PRIVILEGE
+                   FROM ALL_TAB_PRIVS
+                   WHERE TABLE_NAME = '{0}'
+                   AND TABLE_SCHEMA = '{1}'""".format(self.name.upper(), self.owner.upper())
+        execute_object = ArcSDESQLExecute(edit_connection)
+        result = execute_object.execute(query)
+        editable = False
+        for row in result:
+            if row[0] in ("UPDATE", "INSERT", "DELETE"):
+                editable = True
+        return editable
