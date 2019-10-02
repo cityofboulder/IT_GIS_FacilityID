@@ -50,6 +50,7 @@ class Identifier:
     def find_prefix(self):
         """Determines the prefix of the feature class based on the most prevalent occurrence."""
         # TODO: fill in code
+        # TODO: pickle and shelve list of prefixes after every script run
         return True
 
     def get_rows(self):
@@ -78,8 +79,21 @@ class Identifier:
                    AND TABLE_SCHEMA = '{1}'""".format(self.name.upper(), self.owner.upper())
         execute_object = ArcSDESQLExecute(edit_connection)
         result = execute_object.execute(query)
-        editable = False
+        editable = False  # Assume GISSCR user cannot edit by default
         for row in result:
             if row[0] in ("UPDATE", "INSERT", "DELETE"):
                 editable = True
         return editable
+
+
+"""
+Here are all the reasons an ID would need to be edited:
+
+1) No prefix
+2) No number
+3) Prefix not capitalized
+4) Prefix not equal to the layer's designated prefix
+5) Number has leading zeros
+6) NULL
+7) Duplicated
+"""
