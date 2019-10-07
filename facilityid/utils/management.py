@@ -3,6 +3,8 @@ from arcpy.da import Walk
 from arcpy.mp import ArcGISProject
 from arcpy import DeleteVersion_management, ListVersions
 
+from .exceptions import FilterError
+
 
 # Define globals specific to these functions
 aprx_location = "./EditFacilityID.aprx"
@@ -12,11 +14,11 @@ def find_in_sde(sde_path: str = None, *args) -> list:
     """ Finds all possible feature classes within the sde connection provided based on a list of pattern matches, and
     returns a list representing that file path broken into [sde, dataset (if it exists), feature class]. For example,
     the requester might only want to find the path of feature classes that contain "wF", "sw", and "Flood". If no
-    patterns are provided, the function will return the path of everything in SDE.
+    patterns are provided, the function will raise an Error.
 
     :param sde_path: The file path to the sde connection file
     :param args: A list of optional strings to filter the data
-    :return: A list consisting of [root_directory, dataset, feature_name]
+    :return: A tuple consisting of (root_directory, dataset (if exists), feature_name)
     """
     walker = Walk(sde_path, ['FeatureDataset', 'FeatureClass'])
     for directory, folders, files in walker:
@@ -28,6 +30,8 @@ def find_in_sde(sde_path: str = None, *args) -> list:
                     dataset = directory.split(os.sep).pop()
                     item = (directory[:-(1 + len(dataset))], dataset, f)
                 yield item
+            else:
+                raise FilterError("No filters were provided in the configuration file.")
     del walker
 
 
@@ -56,3 +60,8 @@ def add_layer_to_map(feature_class_name: str = None) -> None:
     user_map = aprx.listMaps("%s" % user)[0]
     user_map.addDataFromPath()  # TODO: add data from the gisscr user
     aprx.save()
+
+
+def clear_layers_from_map():
+    # TODO: Translate this function from Map to Pro
+    pass

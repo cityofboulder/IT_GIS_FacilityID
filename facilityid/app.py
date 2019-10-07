@@ -6,6 +6,7 @@ import getpass
 from datetime import datetime
 
 from .utils import management as mgmt
+from .utils.identifier import Identifier
 
 """Read in config.json and assign values to variables"""
 with open('config.json') as config_file:
@@ -18,11 +19,11 @@ edit_connection = configs["sde"]["edit"]
 # Tags designating how to check IDs
 scan_mode = [k for k, v in configs["mode"].items() if v]
 # Designate which users to check IDs for
-users_to_check = configs["users"] if "scan_by_user" in scan_mode else False
+users_to_check = configs["users"] if "scan_by_user" in scan_mode else list()
 # Designate which data sets to check IDs for
-dsets_to_check = configs["dsets"] if "scan_by_dset" in scan_mode else False
+dsets_to_check = configs["dsets"] if "scan_by_dset" in scan_mode else list()
 # Designate which features to check IDs for
-feats_to_check = configs["feats"] if "scan_by_feat" in scan_mode else False
+feats_to_check = configs["feats"] if "scan_by_feat" in scan_mode else list()
 # Combines all filter elements into one list
 filters = users_to_check + dsets_to_check + feats_to_check
 # Define what a row in the sde checklist looks like
@@ -44,3 +45,9 @@ def main():
     """
     # Delete all existing Facility ID versions
     mgmt.delete_facilityid_versions(edit_connection)
+
+    # Clear layers from all edit maps in Pro
+    mgmt.clear_layers_from_map()
+
+    # Create a generator of all feature classes in SDE filtered by the config.json file
+    items = mgmt.find_in_sde(read_connection, filters)
