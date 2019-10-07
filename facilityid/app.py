@@ -19,7 +19,7 @@ edit_connection = configs["sde"]["edit"]
 # Tags designating how to check IDs
 scan_mode = [k for k, v in configs["mode"].items() if v]
 # Designate which users to check IDs for
-users_to_check = configs["users"] if "scan_by_user" in scan_mode else list()
+users_to_check = configs["users"].keys() if "scan_by_user" in scan_mode else list()
 # Designate which data sets to check IDs for
 dsets_to_check = configs["dsets"] if "scan_by_dset" in scan_mode else list()
 # Designate which features to check IDs for
