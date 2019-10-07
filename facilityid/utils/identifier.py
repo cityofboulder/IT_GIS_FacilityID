@@ -7,10 +7,10 @@ class Identifier:
     """A class intended to deal with the specifics of controlling for the quality of Facility IDs. This builds upon the
     Describe object in arcpy."""
     def __init__(self, iterator_path):
-        self.full_path = path.join(*iterator_path)
-        self.owner, self.name = iterator_path[-1].split(".")
         self._desc = Describe(self.full_path)
         self.fields = [f.name for f in ListFields(self.full_path) if not f.required]
+        self.full_path = path.join(*iterator_path)
+        self.owner, self.name = iterator_path[-1].split(".")
         self.prefix = self.find_prefix()
 
     def __getattr__(self, item):
@@ -49,7 +49,7 @@ class Identifier:
 
     def find_prefix(self):
         """Determines the prefix of the feature class based on the most prevalent occurrence."""
-        # TODO: fill in code
+        # TODO: find the prefix on the SQL level using regex or similar to split lines
         # TODO: pickle and shelve list of prefixes after every script run
         return True
 
@@ -83,6 +83,7 @@ class Identifier:
         for row in result:
             if row[0] in ("UPDATE", "INSERT", "DELETE"):
                 editable = True
+                break
         return editable
 
 
@@ -96,4 +97,16 @@ Here are all the reasons an ID would need to be edited:
 5) Number has leading zeros
 6) NULL
 7) Duplicated
+
+Preconditions to check before script run:
+
+ESSENTIALS:
+1) Make sure the item is a table or feature class (STOP if not)
+2) GLOBALID and FACILITYID fields are present (STOP if not)
+3) Make sure some FACILITYIDs already exist (STOP if not)
+
+NON ESSENTIALS:
+4) Make sure the item is versioned (CONTINUE regardless)
+5) Check if GISSCR can edit (CONTINUE either way)
+6) Check that Editor Tracking is turned on (CONTINUE either way)
 """
