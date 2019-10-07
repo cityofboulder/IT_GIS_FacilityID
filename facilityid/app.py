@@ -28,10 +28,6 @@ dsets_to_check = configs["dsets"] if "scan_by_dset" in scan_mode else list()
 feats_to_check = configs["feats"] if "scan_by_feat" in scan_mode else list()
 # Combines all filter elements into one list
 filters = users_to_check + dsets_to_check + feats_to_check
-# Define what a row in the sde checklist looks like
-checklist_row = configs["checklist"]
-# Define what a row in the edit summary looks like
-edit_counts_row = configs["count"]
 
 """Define variables that are constant throughout the script"""
 # User who initiated the script
@@ -39,6 +35,10 @@ username = getpass.getuser()
 # Day and time script was run
 start_date_string = datetime.now().strftime("%Y%m%d")
 start_time_string = datetime.now().strftime('%H%M')
+# Define what a row in the sde checklist looks like
+checklist_row = configs["checklist"]
+# Define what a row in the edit summary looks like
+edit_counts_row = configs["count"]
 
 
 def main():
