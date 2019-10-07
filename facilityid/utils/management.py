@@ -4,6 +4,7 @@ from arcpy.mp import ArcGISProject
 from arcpy import DeleteVersion_management, ListVersions
 
 from .exceptions import FilterError
+from .identifier import Identifier
 
 
 # Define globals specific to these functions
@@ -23,13 +24,13 @@ def find_in_sde(sde_path: str = None, *args) -> list:
     walker = Walk(sde_path, ['FeatureDataset', 'FeatureClass'])
     for directory, folders, files in walker:
         for f in files:
-            if args and any(arg in f for arg in args):
+            if any(arg in f for arg in args):
                 if directory.endswith(".sde"):
                     item = (directory, f)
                 else:
                     dataset = directory.split(os.sep).pop()
                     item = (directory[:-(1 + len(dataset))], dataset, f)
-                yield item
+                yield Identifier(item)
             else:
                 raise FilterError("No filters were provided in the configuration file.")
     del walker
