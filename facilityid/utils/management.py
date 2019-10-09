@@ -3,7 +3,6 @@ from arcpy.da import Walk
 from arcpy.mp import ArcGISProject
 from arcpy import DeleteVersion_management, ListVersions
 
-from .exceptions import FilterError
 from .identifier import Identifier
 
 
@@ -11,28 +10,34 @@ from .identifier import Identifier
 aprx_location = "./EditFacilityID.aprx"
 
 
-def find_in_sde(sde_path: str = None, *args) -> list:
+def find_in_sde(sde_path: str = None, *args) -> Identifier:
     """ Finds all possible feature classes within the sde connection provided based on a list of pattern matches, and
     returns a list representing that file path broken into [sde, dataset (if it exists), feature class]. For example,
     the requester might only want to find the path of feature classes that contain "wF", "sw", and "Flood". If no
-    patterns are provided, the function will raise an Error.
+    patterns are provided, the function will return all feature classes in the sde_path.
 
     :param sde_path: The file path to the sde connection file
     :param args: A list of optional strings to filter the data
-    :return: A tuple consisting of (root_directory, dataset (if exists), feature_name)
+    :return: An Identifier object
     """
     walker = Walk(sde_path, ['FeatureDataset', 'FeatureClass'])
     for directory, folders, files in walker:
+        items = list()
         for f in files:
-            if any(arg in f for arg in args):
-                if directory.endswith(".sde"):
-                    item = (directory, f)
-                else:
-                    dataset = directory.split(os.sep).pop()
-                    item = (directory[:-(1 + len(dataset))], dataset, f)
-                yield Identifier(item)
+            if directory.endswith(".sde"):
+                items.append((directory, f))
             else:
-                raise FilterError("No filters were provided in the configuration file.")
+                dataset = directory.split(os.sep).pop()
+                items.append((directory[:-(1 + len(dataset))], dataset, f))
+
+    if not args or len(args) == 0:  # If no args are given or the list passed to args is empty
+        for item in items:
+            yield Identifier(item)
+    else:  # else, args were provided and the list passed to args is not empty, return filtered
+        filtered_items = list(filter(lambda x: any(arg in x for arg in args), items))
+        for item in filtered_items:
+            yield Identifier(item)
+
     del walker
 
 
