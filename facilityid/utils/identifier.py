@@ -1,11 +1,14 @@
-from arcpy import ArcSDESQLExecute, ExecuteError, GetCount_management, ListFields
-from arcpy.da import SearchCursor, Describe
 import os
+
+from arcpy import ArcSDESQLExecute, Describe, ExecuteError, GetCount_management, ListFields
+from arcpy.da import SearchCursor
 
 
 class Identifier:
-    """A class intended to deal with the specifics of controlling for the quality of Facility IDs. This builds upon the
-    Describe object in arcpy."""
+    """A class intended to deal with the specifics of controlling for the quality of Facility IDs. 
+    This class inherits the functionality of the arcpy.Describe function.
+    """
+
     def __init__(self, tuple_path):
         self.tuple_path = tuple_path
         self.full_path = os.path.join(*self.tuple_path)
@@ -80,26 +83,27 @@ class Identifier:
 
         :return: List, rows represented as dictionaries within a list
         """
-        fields = ['GLOBALID', 'FACILITYID', 'CREATED_USER', 'CREATED_DATE', 'LAST_EDITED_USER', 'LAST_EDITED_DATE']
-        if self._desc.dataType == 'FeatureClass':
+        fields = ['GLOBALID', 'FACILITYID', 'CREATED_USER',
+                  'CREATED_DATE', 'LAST_EDITED_USER', 'LAST_EDITED_DATE']
+        if self.datasetType == 'FeatureClass':
             fields.append('SHAPE@')
         row_list = []
         with SearchCursor(self.full_path, fields) as search:
             for row in search:
-                row_list.append({fields[i]: row[i] for i in range(len(row))})
+                row_list.append({fields[i]: row[i] for i in range(len(fields))})
         return row_list
 
-    def gisscr_can_edit(self, edit_connection) -> bool:
+    def can_gisscr_edit(self, connection) -> bool:
         """Reveals if the feature class is editable through the GISSCR connection.
 
-        :param edit_connection: File path to a gisscr SDE connection
+        :param connection: File path to an SDE connection with the GISSCR user
         :return: Boolean
         """
         query = """SELECT PRIVILEGE
                    FROM ALL_TAB_PRIVS
-                   WHERE TABLE_NAME = '{0}'
-                   AND TABLE_SCHEMA = '{1}'""".format(self.name.upper(), self.owner.upper())
-        execute_object = ArcSDESQLExecute(edit_connection)
+                   WHERE TABLE_NAME = '{table}'
+                   AND TABLE_SCHEMA = '{owner}'""".format(table=self.name.upper(), owner=self.owner.upper())
+        execute_object = ArcSDESQLExecute(connection)
         result = execute_object.execute(query)
         editable = False  # Assume GISSCR user cannot edit by default
         for row in result:
