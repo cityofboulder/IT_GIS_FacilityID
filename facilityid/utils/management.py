@@ -10,35 +10,41 @@ from .identifier import Identifier
 aprx_location = "./EditFacilityID.aprx"
 
 
-def find_in_sde(sde_path: str = None, *args) -> Identifier:
+def find_in_sde(sde_path: str, includes: list = None, excludes: list = None) -> list:
     """ Finds all possible feature classes within the sde connection provided based on a list of pattern matches, and
     returns a list representing that file path broken into [sde, dataset (if it exists), feature class]. For example,
     the requester might only want to find the path of feature classes that contain "wF", "sw", and "Flood". If no
     patterns are provided, the function will return all feature classes in the sde_path.
 
     :param sde_path: The file path to the sde connection file
-    :param args: A list of optional strings to filter the data
-    :return: An Identifier object
+    :param includes: A list of optional strings that all output must contain
+    :param excludes: A list of optional strings that all output cannot contain
+    :return: A list of tuples representing (root dir, dataset, feature)
     """
     walker = Walk(sde_path, ['FeatureDataset', 'FeatureClass'])
-    for directory, folders, files in walker:
-        items = list()
+    items = list()
+    for directory, _, files in walker:
         for f in files:
             if directory.endswith(".sde"):
                 items.append((directory, f))
             else:
-                dataset = directory.split(os.sep).pop()
-                items.append((directory[:-(1 + len(dataset))], dataset, f))
-
-    if not args or len(args) == 0:  # If no args are given or the list passed to args is empty
-        for item in items:
-            yield Identifier(item)
-    else:  # else, args were provided and the list passed to args is not empty, return filtered
-        filtered_items = list(filter(lambda x: any(arg in x for arg in args), items))
-        for item in filtered_items:
-            yield Identifier(item)
-
+                root = os.path.dirname(directory)
+                dataset = os.path.basename(directory)
+                items.append((root, dataset, f))
     del walker
+
+    # Make sure that the output includes or excludes the keywords provided at function call
+    tests = [
+        [includes, lambda x: any(arg.lower() in x[-1].lower() for arg in includes)],
+        [excludes, lambda x: any(arg.lower() not in x[-1].lower() for arg in excludes)]
+    ]
+    for test in tests:
+        if not test[0]:
+            continue
+        else:
+            items = list(filter(test[1], items))
+
+    return items.sort(key=lambda x: x[-1])
 
 
 def delete_facilityid_versions(connection: str = None) -> None:
