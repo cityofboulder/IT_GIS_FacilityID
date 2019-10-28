@@ -28,7 +28,6 @@ class Identifier:
         self.has_records = True if self.record_count(
         ) is not None or self.record_count() >= 1 else False
         self.prefix = self.find_prefix()
-        self.duplicates = self.get_duplicates()
 
         self._desc = Describe(self.full_path)
 
@@ -68,24 +67,21 @@ class Identifier:
 
     def get_duplicates(self):
         # Initialize an executor object for SDE
-        if self.has_records and self.has_facilityid:
-            execute_object = ArcSDESQLExecute(self.connection)
-            query = f"""SELECT a.GLOBALID,
-                        a.FACILITYID
-                        FROM {self.database_name} a
-                        JOIN (SELECT FACILITYID,
-                            GLOBALID,
-                            COUNT(*)
-                            FROM {self.database_name}
-                            GROUP BY FACILITYID, GLOBALID
-                            HAVING COUNT(*) > 1) b
-                        ON a.GLOBALID = b.GLOBALID"""
-            try:
-                result = execute_object.execute(query)
-                return result
-            except (ExecuteError, TypeError, AttributeError):
-                return None
-        else:
+        execute_object = ArcSDESQLExecute(self.connection)
+        query = f"""SELECT a.GLOBALID,
+                    a.FACILITYID
+                    FROM {self.database_name} a
+                    JOIN (SELECT FACILITYID,
+                        GLOBALID,
+                        COUNT(*)
+                        FROM {self.database_name}
+                        GROUP BY FACILITYID, GLOBALID
+                        HAVING COUNT(*) > 1) b
+                    ON a.GLOBALID = b.GLOBALID"""
+        try:
+            result = execute_object.execute(query)
+            return result
+        except (ExecuteError, TypeError, AttributeError):
             return None
 
     def get_rows(self):
@@ -93,8 +89,11 @@ class Identifier:
 
         :return: List, rows represented as dictionaries within a list
         """
-        fields = ['GLOBALID', 'FACILITYID', 'CREATED_USER',
-                  'CREATED_DATE', 'LAST_EDITED_USER', 'LAST_EDITED_DATE']
+        edit_fields = [self.creatorFieldName,
+                       self.createdAtFieldName,
+                       self.editorFieldName,
+                       self.editedAtFieldName]
+        fields = ['GLOBALID', 'FACILITYID'] + edit_fields
         if self.datasetType == 'FeatureClass':
             fields.append('SHAPE@')
         row_list = []
@@ -121,28 +120,3 @@ class Identifier:
                 editable = True
                 break
         return editable
-
-
-"""
-Here are all the reasons an ID would need to be edited:
-
-1) No prefix
-2) No number
-3) Prefix not capitalized
-4) Prefix not equal to the layer's designated prefix
-5) Number has leading zeros
-6) NULL
-7) Duplicated
-
-Preconditions to check before script run:
-
-ESSENTIALS:
-1) Make sure the item is a table or feature class (STOP if not)
-2) GLOBALID and FACILITYID fields are present (STOP if not)
-3) Make sure some FACILITYIDs already exist (STOP if not)
-
-NON ESSENTIALS:
-4) Make sure the item is versioned (CONTINUE regardless)
-5) Check if GISSCR can edit (CONTINUE either way)
-6) Check that Editor Tracking is turned on (CONTINUE either way)
-"""
