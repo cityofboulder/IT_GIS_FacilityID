@@ -85,10 +85,19 @@ class Identifier:
             return None
 
     def get_rows(self):
-        """Opens an arcpy SearchCursor and records fields relevant to the QC of FACILITYID
-
-        :return: List, rows represented as dictionaries within a list
+        """Extracts a feature's table for analysis
+        
+        Extracts FACILITYID, GLOBALID, edit metadata, and SHAPE fields 
+        of a feature class or table. Edit metadata fields are
+        dynamically assigned based on attributes of a fc's describe obj.
+        FACILITYIDs are further broken into {"prefix": x, "str_id": y}.
+        
+        Returns
+        -------
+        list
+            rows represented as dicitionaries
         """
+
         edit_fields = [self.creatorFieldName,
                        self.createdAtFieldName,
                        self.editorFieldName,
@@ -96,10 +105,19 @@ class Identifier:
         fields = ['GLOBALID', 'FACILITYID'] + edit_fields
         if self.datasetType == 'FeatureClass':
             fields.append('SHAPE@')
+        
         row_list = []
         with SearchCursor(self.full_path, fields) as search:
             for row in search:
                 row_list.append({fields[i]: row[i] for i in range(len(fields))})
+        
+        # transform the output of the FACILITYID field
+        for row in row_list:
+            if row["FACILITYID"]:
+                pfix = "".join([x for x in row["FACILITYID"] if x.isalpha()])
+                id_str = row["FACILITYID"][len(pfix):]
+                row["FACILITYID"] = {"prefix": pfix, "str_id": id_str}
+
         return row_list
 
     def can_gisscr_edit(self, connection) -> bool:
