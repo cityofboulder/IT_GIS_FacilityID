@@ -61,6 +61,7 @@ def main():
         preconditions = [facilityid.has_table,
                          facilityid.has_facilityid,
                          facilityid.has_globalid,
+                         facilityid.editorTrackingEnabled,
                          facilityid.prefix
                          ]
         if not all(preconditions):
