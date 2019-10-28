@@ -57,13 +57,14 @@ def main():
         # Step 4a: Initialize an identifier object
         facilityid = Identifier(feature)
 
-        #Step 4b: Check that all preconditions are met before proceeding
-        preconditions = [facilityid.has_table,
-                         facilityid.has_facilityid,
-                         facilityid.has_globalid,
-                         facilityid.editorTrackingEnabled,
-                         facilityid.prefix
-                         ]
-        if not all(preconditions):
+        #Step 4b: Make preliminary checks before analyzing the feature
+        essentials = [facilityid.has_table,
+                      facilityid.has_facilityid,
+                      facilityid.has_globalid,
+                      facilityid.editorTrackingEnabled,
+                      facilityid.prefix]
+        non_essentials = [facilityid.isVersioned,
+                          facilityid.can_gisscr_edit(edit_connection)]
+        if not all(essentials):
             # TODO: log that the layer will not be analyzed
             continue
