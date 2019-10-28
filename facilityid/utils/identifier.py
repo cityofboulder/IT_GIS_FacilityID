@@ -21,6 +21,9 @@ class Identifier:
         self.prefix = self.find_prefix()
 
         self._desc = Describe(self.full_path)
+        self.database_name = ".".join([self.owner, self.name[:26]]).upper() + \
+            "_EVW" if self.isVersioned else ".".join(
+                [self.owner, self.name[:30]]).upper()
 
     def __getattr__(self, item):
         """Pass any other attribute or method calls through to the underlying Describe object"""
@@ -61,11 +64,9 @@ class Identifier:
         if self.has_facilityid():
             # Initialize an executor object for SDE
             execute_object = ArcSDESQLExecute(self.connection)
-            query_name = ".".join([self.owner, self.name[:26]]) + "_EVW" if self.isVersioned else ".".join(
-                [self.owner, self.name[:30]])
             query = f"""SELECT REGEXP_SUBSTR(FACILITYID, '^[a-zA-Z]+') as PREFIXES,
                     COUNT(*) as PFIXCOUNT
-                    FROM {query_name}
+                    FROM {self.database_name}
                     GROUP BY REGEXP_SUBSTR(FACILITYID, '^[a-zA-Z]+')
                     ORDER BY PFIXCOUNT DESC
                     FETCH FIRST ROW ONLY"""
@@ -77,6 +78,25 @@ class Identifier:
         else:
             return None
         # TODO: pickle and shelve list of prefixes after every script run
+
+    def get_duplicates(self):
+        # Initialize an executor object for SDE
+        execute_object = ArcSDESQLExecute(self.connection)
+        query = f"""SELECT a.GLOBALID,
+                    a.FACILITYID
+                    FROM {self.database_name} a
+                    JOIN (SELECT FACILITYID,
+                        GLOBALID,
+                        COUNT(*)
+                        FROM {self.database_name}
+                        GROUP BY FACILITYID, GLOBALID
+                        HAVING COUNT(*) > 1) b
+                    ON a.GLOBALID = b.GLOBALID"""
+        try:
+            result = execute_object.execute(query)
+            return result
+        except (ExecuteError, TypeError, AttributeError):
+            return None
 
     def get_rows(self):
         """Opens an arcpy SearchCursor and records fields relevant to the QC of FACILITYID
