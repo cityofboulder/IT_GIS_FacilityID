@@ -54,4 +54,15 @@ def main():
 
     # Step 4: Iterate through each feature
     for feature in features:
-        pass
+        # Step 4a: Initialize an identifier object
+        facilityid = Identifier(feature)
+
+        #Step 4b: Check that all preconditions are met before proceeding
+        preconditions = [facilityid.has_table,
+                         facilityid.has_facilityid,
+                         facilityid.has_globalid,
+                         facilityid.prefix
+                         ]
+        if not all(preconditions):
+            # TODO: log that the layer will not be analyzed
+            continue
