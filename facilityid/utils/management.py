@@ -35,8 +35,10 @@ def find_in_sde(sde_path: str, includes: list = None, excludes: list = None) -> 
 
     # Make sure that the output includes or excludes the keywords provided at function call
     tests = [
-        [includes, lambda x: any(arg.lower() in x[-1].lower() for arg in includes)],
-        [excludes, lambda x: any(arg.lower() not in x[-1].lower() for arg in excludes)]
+        [includes, lambda x: any(arg.lower() in os.path.join(
+            x).lower() for arg in includes)],
+        [excludes, lambda x: any(arg.lower() not in os.path.join(
+            x).lower() for arg in excludes)]
     ]
     for test in tests:
         if not test[0]:
