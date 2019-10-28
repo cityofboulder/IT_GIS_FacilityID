@@ -5,7 +5,7 @@ import json
 import getpass
 from datetime import datetime
 
-from .utils import management as mgmt
+from .utils.management import delete_facilityid_versions, clear_layers_from_map, find_in_sde
 from .utils.identifier import Identifier
 
 """Read in config.json and assign values to variables"""
@@ -21,7 +21,8 @@ scan_mode = [k for k, v in configs["mode"].items() if v]
 # Designate which users have authorized scripted edits
 authorize_scripted_edits = [k for k, v in configs["users"].items() if v]
 # Designate which users to check IDs for
-users_to_check = configs["users"].keys() if "scan_by_user" in scan_mode else list()
+users_to_check = configs["users"].keys(
+) if "scan_by_user" in scan_mode else list()
 # Designate which data sets to check IDs for
 dsets_to_check = configs["dsets"] if "scan_by_dset" in scan_mode else list()
 # Designate which features to check IDs for
@@ -42,14 +43,15 @@ edit_counts_row = configs["count"]
 
 
 def main():
-    """ The main function of the facility id checker.
-    :return:
-    """
-    # Delete all existing Facility ID versions
-    mgmt.delete_facilityid_versions(edit_connection)
+    # Step 1: Delete all existing Facility ID versions
+    delete_facilityid_versions(edit_connection)
 
-    # Clear layers from all edit maps in Pro
-    mgmt.clear_layers_from_map()
+    # Step 2: Clear layers from all edit maps in Pro
+    clear_layers_from_map()
 
-    # Create a generator of all feature classes in SDE filtered by the config.json file
-    items = mgmt.find_in_sde(read_connection, filters)
+    # Step 3: Obtain tuples of system paths for every fc
+    features = find_in_sde(read_connection, filters)
+
+    # Step 4: Iterate through each feature
+    for feature in features:
+        pass
