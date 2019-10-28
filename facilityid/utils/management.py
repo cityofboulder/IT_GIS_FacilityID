@@ -71,7 +71,7 @@ def add_layer_to_map(feature_class_name: str = None) -> None:
     """
     user, fc = feature_class_name.split(".")
     aprx = ArcGISProject(aprx_location)
-    user_map = aprx.listMaps("%s" % user)[0]
+    user_map = aprx.listMaps(f"{user}")[0]
     user_map.addDataFromPath()  # TODO: add data from the gisscr user
     aprx.save()
 
