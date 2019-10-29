@@ -1,6 +1,7 @@
 import os
+import re
 
-from arcpy import ArcSDESQLExecute, Describe, ExecuteError, GetCount_management, ListFields
+from arcpy import ArcSDESQLExecute, Describe, ExecuteError, ListFields
 from arcpy.da import SearchCursor
 
 
@@ -115,15 +116,29 @@ class Identifier:
         # the value into prefix, id as string, and id as integer
         for row in row_list:
             if row["FACILITYID"]:
-                pfix = "".join([x for x in row["FACILITYID"] if x.isalpha()])
-                id_str = row["FACILITYID"][len(pfix):]
-                id_int = int(id_str)
+                f_id = str(row["FACILITYID"])
+                # Use regex to find the prefix of the row's FACILITYID
+                try:
+                    pfix = re.findall(r"^\D+", f_id)[0]
+                except IndexError:  # re.findall returns [] if the pattern doesn't exist
+                    pfix = ""
+
+                # Define the ID as everything following the prefix
+                id_str = f_id[len(pfix):]
+
+                # Convert the string ID to integer
+                try:
+                    id_int = int(id_str)
+                except ValueError:  # if id_str has non-numeric chars, assume no ID
+                    id_str = ""
+                    id_int = None
+
                 row["FACILITYID"] = {"prefix": pfix,
                                      "str_id": id_str,
                                      "int_id": id_int}
             else:
-                row["FACILITYID"] = {"prefix": None,
-                                     "str_id": None,
+                row["FACILITYID"] = {"prefix": "",
+                                     "str_id": "",
                                      "int_id": None} 
 
         return row_list
