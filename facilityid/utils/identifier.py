@@ -111,12 +111,20 @@ class Identifier:
             for row in search:
                 row_list.append({fields[i]: row[i] for i in range(len(fields))})
         
-        # transform the output of the FACILITYID field
+        # Transform the output of the FACILITYID field by breaking apart 
+        # the value into prefix, id as string, and id as integer
         for row in row_list:
             if row["FACILITYID"]:
                 pfix = "".join([x for x in row["FACILITYID"] if x.isalpha()])
                 id_str = row["FACILITYID"][len(pfix):]
-                row["FACILITYID"] = {"prefix": pfix, "str_id": id_str}
+                id_int = int(id_str)
+                row["FACILITYID"] = {"prefix": pfix,
+                                     "str_id": id_str,
+                                     "int_id": id_int}
+            else:
+                row["FACILITYID"] = {"prefix": None,
+                                     "str_id": None,
+                                     "int_id": None} 
 
         return row_list
 
