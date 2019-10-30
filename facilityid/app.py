@@ -57,7 +57,7 @@ def main():
         # Step 4a: Initialize an identifier object
         facilityid = Identifier(feature)
 
-        #Step 4b: Make preliminary checks before analyzing the feature
+        # Step 4b: Make preliminary checks before analyzing the feature
         essentials = [facilityid.has_table,
                       facilityid.has_facilityid,
                       facilityid.has_globalid,
@@ -68,3 +68,11 @@ def main():
         if not all(essentials):
             # TODO: log that the layer will not be analyzed
             continue
+
+        # Step 4c: Extract rows
+        table = facilityid.get_rows()
+
+        # Step 4d: Identify the GLOBALIDs of duplicated FACIDs
+        duplicates = facilityid.get_duplicates()
+
+        # Step 4e: Make edits to each row

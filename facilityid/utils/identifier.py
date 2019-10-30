@@ -91,7 +91,8 @@ class Identifier:
         Extracts FACILITYID, GLOBALID, edit metadata, and SHAPE fields 
         of a feature class or table. Edit metadata fields are
         dynamically assigned based on attributes of a fc's describe obj.
-        FACILITYIDs are further broken into {"prefix": x, "str_id": y}.
+        FACILITYIDs are further broken into {"prefix": x, "str_id": y, 
+        "int_id": z}.
         
         Returns
         -------
