@@ -120,7 +120,8 @@ class Identifier:
                 # Use regex to find the prefix of the row's FACILITYID
                 try:
                     pfix = re.findall(r"^\D+", f_id)[0]
-                except IndexError:  # re.findall returns [] if the pattern doesn't exist
+                # re.findall returns [] if the pattern doesn't exist
+                except IndexError:
                     pfix = ""
 
                 # Define the ID as everything following the prefix
@@ -129,7 +130,8 @@ class Identifier:
                 # Convert the string ID to integer
                 try:
                     id_int = int(id_str)
-                except ValueError:  # if id_str has non-numeric chars, assume no ID
+                # if id_str has non-numeric chars, assume no ID
+                except ValueError:
                     id_str = ""
                     id_int = None
 
@@ -161,3 +163,37 @@ class Identifier:
                 editable = True
                 break
         return editable
+
+def get_ids(in_list: list) -> (int, list):
+    """Extracts the maximum id and a list of all unused ids up to the
+    maximum.
+    
+    Parameters
+    ----------
+    in_list : list
+        The list of dict-like rows created by the get_rows method. 
+    
+    Returns
+    -------
+    tuple
+        Maximum ID used by the layer, and a reverse sorted list of
+        unused ids between the minimum and maximum id.
+    """
+    used = sorted([x["FACILITYID"]["int_id"]
+                  for x in in_list if x["FACILITYID"]["int_id"] is not None],
+                  reverse=True)
+    min_id = used[-1]
+    max_id = used[0]
+
+    # initiate a try block in case the max id is too large to compute a 
+    # set and overflows computer memory
+    for m in used:
+        try:
+            set_of_all = set(range(min_id, m))
+            set_of_used = set(used)
+            unused = sorted(list(set_of_all - set_of_used), reverse=True)
+            break
+        except (OverflowError, MemoryError):
+            continue
+
+    return (max_id, unused)
