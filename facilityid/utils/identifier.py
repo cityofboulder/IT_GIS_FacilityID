@@ -177,8 +177,8 @@ def get_ids(in_list: list) -> (int, list):
     Returns
     -------
     tuple
-        Maximum ID used by the layer, and a reverse sorted list of
-        unused ids between the minimum and maximum id.
+        Maximum ID used by the layer returned as a list, and a reverse 
+        sorted list of unused ids between the minimum and maximum id.
     """
     used = sorted([x["FACILITYID"]["int_id"]
                   for x in in_list if x["FACILITYID"]["int_id"] is not None],
@@ -197,4 +197,37 @@ def get_ids(in_list: list) -> (int, list):
         except (OverflowError, MemoryError):
             continue
 
-    return (max_id, unused)
+    return ([max_id], unused)
+
+def apply_id(max_list: list, unused_list: list):
+    """Finds the next best ID to apply to a row with missing or
+    duplicated IDs.
+
+    This function modifies both inputs by either popping the last item
+    off the end of the list or incrementing the max_list ID by 1.
+    
+    Parameters
+    ----------
+    max_list : list
+        The maximum ID used in the entire feature class. The function
+        modifies the list of maximum IDs when new IDs are added that
+        exceed the current max.
+    unused_list : list
+        A list of unused IDs between the minimum and maximum IDs in the 
+        feature class, and ordered from largest to smallest. If all IDs
+        are used b/w the min and max, this list is empty.
+    
+    Returns
+    -------
+    int
+        An integer number representing the next logical ID to assign
+    """
+    if unused_list:
+        new_id = unused_list.pop()
+    else:
+        max_id = max(max_list) + 1
+        max_list.append(max_id)
+        new_id = max_id
+    
+    return new_id
+    
