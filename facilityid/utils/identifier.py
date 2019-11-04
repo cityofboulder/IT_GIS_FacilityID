@@ -6,8 +6,9 @@ from arcpy.da import SearchCursor
 
 
 class Identifier:
-    """A class intended to deal with the specifics of controlling for the quality of Facility IDs. 
-    This class inherits the functionality of the arcpy.Describe function.
+    """A class intended to deal with the specifics of controlling for
+    the quality of Facility IDs. This class inherits the functionality
+    of the arcpy.Describe function.
     """
 
     def __init__(self, tuple_path):
@@ -33,22 +34,25 @@ class Identifier:
         self._desc = Describe(self.full_path)
 
     def __getattr__(self, item):
-        """Pass any other attribute or method calls through to the underlying Describe object"""
+        """Pass any other attribute or method calls through to the
+        underlying Describe object"""
         return getattr(self._desc, item)
 
     def record_count(self) -> bool:
-        """Determines if there are any records in the feature class to analyze."""
+        """Determines if there are any records in the feature class to
+        analyze."""
         execute_object = ArcSDESQLExecute(self.connection)
         try:
             query = f"""SELECT COUNT(*) FROM {self.database_name}"""
             result = execute_object.execute(query)
             return int(result)
         except ExecuteError:
-            # TODO: Add info logging describing an error in retrieving a feature count
+            # TODO: Add info logging
             return None
 
     def find_prefix(self):
-        """Determines the prefix of the feature class based on the most prevalent occurrence."""
+        """Determines the prefix of the feature class based on the most
+        prevalent occurrence."""
         if self.has_facilityid:
             # Initialize an executor object for SDE
             execute_object = ArcSDESQLExecute(self.connection)
@@ -87,13 +91,13 @@ class Identifier:
 
     def get_rows(self):
         """Extracts a feature's table for analysis
-        
-        Extracts FACILITYID, GLOBALID, edit metadata, and SHAPE fields 
+
+        Extracts FACILITYID, GLOBALID, edit metadata, and SHAPE fields
         of a feature class or table. Edit metadata fields are
         dynamically assigned based on attributes of a fc's describe obj.
-        FACILITYIDs are further broken into {"prefix": x, "str_id": y, 
+        FACILITYIDs are further broken into {"prefix": x, "str_id": y,
         "int_id": z}.
-        
+
         Returns
         -------
         list
@@ -107,13 +111,14 @@ class Identifier:
         fields = ['GLOBALID', 'FACILITYID'] + edit_fields
         if self.datasetType == 'FeatureClass':
             fields.append('SHAPE@')
-        
+
         row_list = []
         with SearchCursor(self.full_path, fields) as search:
             for row in search:
-                row_list.append({fields[i]: row[i] for i in range(len(fields))})
-        
-        # Transform the output of the FACILITYID field by breaking apart 
+                row_list.append({fields[i]: row[i]
+                                 for i in range(len(fields))})
+
+        # Transform the output of the FACILITYID field by breaking apart
         # the value into prefix, id as string, and id as integer
         for row in row_list:
             if row["FACILITYID"]:
@@ -142,7 +147,7 @@ class Identifier:
             else:
                 row["FACILITYID"] = {"prefix": "",
                                      "str_id": "",
-                                     "int_id": None} 
+                                     "int_id": None}
 
         return row_list
 
@@ -165,19 +170,20 @@ class Identifier:
                 break
         return editable
 
+
 def get_ids(in_list: list) -> (int, list):
     """Extracts the maximum id and a list of all unused ids up to the
     maximum.
-    
+
     Parameters
     ----------
     in_list : list
-        The list of dict-like rows created by the get_rows method. 
-    
+        The list of dict-like rows created by the get_rows method.
+
     Returns
     -------
     tuple
-        Maximum ID used by the layer returned as a list, and a reverse 
+        Maximum ID used by the layer returned as a list, and a reverse
         sorted list of unused ids between the minimum and maximum id.
     """
     used = sorted([x["FACILITYID"]["int_id"]
@@ -186,7 +192,7 @@ def get_ids(in_list: list) -> (int, list):
     min_id = used[-1]
     max_id = used[0]
 
-    # initiate a try block in case the max id is too large to compute a 
+    # initiate a try block in case the max id is too large to compute a
     # set and overflows computer memory
     for m in used:
         try:
@@ -199,13 +205,14 @@ def get_ids(in_list: list) -> (int, list):
 
     return ([max_id], unused)
 
+
 def apply_id(max_list: list, unused_list: list):
     """Finds the next best ID to apply to a row with missing or
     duplicated IDs.
 
     This function modifies both inputs by either popping the last item
     off the end of the list or incrementing the max_list ID by 1.
-    
+
     Parameters
     ----------
     max_list : list
@@ -213,10 +220,10 @@ def apply_id(max_list: list, unused_list: list):
         modifies the list of maximum IDs when new IDs are added that
         exceed the current max.
     unused_list : list
-        A list of unused IDs between the minimum and maximum IDs in the 
+        A list of unused IDs between the minimum and maximum IDs in the
         feature class, and ordered from largest to smallest. If all IDs
         are used b/w the min and max, this list is empty.
-    
+
     Returns
     -------
     int
@@ -228,6 +235,5 @@ def apply_id(max_list: list, unused_list: list):
         max_id = max(max_list) + 1
         max_list.append(max_id)
         new_id = max_id
-    
+
     return new_id
-    
