@@ -17,70 +17,81 @@ def _get_values(rows: list, field: str) -> list:
     return values
 
 
-def edit(rows: list, duplicates: list, prefix: str, geom_type: str) -> list:
-    """Iterates through a list of rows, editing incorrect or duplicated
-    entries along the way.
-
-    This function edits duplicated FACILITYIDs first, followed by
-    incorrect or missing FACILITYIDs. The function knows to edit
-    incorrect IDs based on the following criteria:
-
-        Prefix is not capitalized
-        Prefix of the row does not exist
-        Prefix does not equal the layer's designated prefix
-        The ID does not exist
-        The ID has leading zeros
-        The ID has already been used
+class Edit:
+    """A class meant to be used once a table has been slated for edits.
 
     Parameters
     ----------
     rows : list
-        Rows represented as dictionaries, packaged in a list
+        A list of dictionaries, where each dict represents a row of the
+        table
     duplicates : list
         A list of GLOBALIDs that have duplicated FACILITYIDs
     prefix : str
         The correct prefix for the layer
     geom_type : str
-        The type of geometry being evaluated
+        The type of geometry being evaluated. None if evaluating a table
 
-    Returns
-    -------
-    list
-        Edited rows represented as dictionaries, packaged in a list
+    Attributes
+    ----------
+    used : list
+        A reverse sorted list of used IDs in the table
+    unused : list
+        A reverse sorted list of unused IDs between the min and max of
+        used IDs
+    edited : list
+        A list of dicts, where each dict represents a row that has had
+        its FACILITYID changed.
     """
+    def __init__(self, rows, duplicates, prefix, geom_type):
+        self.rows = rows
+        self.duplicates = duplicates
+        self.prefix = prefix
+        self.geom_type = geom_type
+        self.used = self.get_used()
+        self.unused = self.get_unused()
+        self.edited = list()
 
-    def get_ids() -> tuple:
-        """Extracts lists of all used and unused ids (between the
-        minimum and maximum ids).
+    def get_used(self):
+        """Extracts a list of used ids in rows, sorted in reverse order.
 
         Returns
         -------
-        used : list
-            Used IDs, sorted in reverse order.
-        unused : list
-            Unused IDs, sorted in reverse order. The unused list is
-            empty if all IDs between min and max have been assigned.
+        list
+            Used IDs between min and max utilized IDs
+        """
+        all_used = sorted(
+            [x["FACILITYID"]["int_id"]
+             for x in self.rows if x["FACILITYID"]["int_id"] is not None],
+            reverse=True)
+        return all_used
+
+    def get_unused(self) -> list:
+        """Extracts a list of unused ids that lie between the minimum
+        and maximum ids in order to backfill gaps in ID sequences.
+
+        Returns
+        -------
+        list
+            Unused IDs between the minimum and maximum utilized IDs
         """
 
-        used = sorted([x["FACILITYID"]["int_id"]
-                      for x in rows if x["FACILITYID"]["int_id"] is not None],
-                      reverse=True)
-        min_id = used[-1]
+        min_id = self.used[-1]
 
         # initiate a try block in case the max id is too large to compute a set
         # and overflows computer memory
-        for m in used:
+        for m in self.used:
             try:
                 set_of_all = set(range(min_id, m))
-                set_of_used = set(used)
+                set_of_used = set(self.used)
                 unused = sorted(list(set_of_all - set_of_used), reverse=True)
                 break
             except (OverflowError, MemoryError):
                 continue
 
-        return (used, unused)
+        return unused
 
-    def apply_id(used: list, unused: list) -> int:
+    def get_new_id(self) -> int:
         """Finds the next best ID to apply to a row with missing or
         duplicated IDs.
 
@@ -102,16 +113,16 @@ def edit(rows: list, duplicates: list, prefix: str, geom_type: str) -> list:
             An integer number representing the next logical ID to assign
         """
 
-        if unused:
-            new_id = unused.pop()
+        if self.unused:
+            new_id = self.unused.pop()
         else:
-            max_id = used[0] + 1
-            used.insert(0, max_id)
+            max_id = self.used[0] + 1
             new_id = max_id
+            self.used.insert(0, max_id)
 
         return new_id
 
-    def sorter(x):
+    def duplicate_sorter(self, x):
         """A function meant to be used in the builtin sort function for
         lists.
 
@@ -126,7 +137,7 @@ def edit(rows: list, duplicates: list, prefix: str, geom_type: str) -> list:
         Returns
         -------
         tuple
-            The tuple that dictates how to multi-sort
+            A tuple that dictates how to multi-sort
         """
 
         # Define date to replace Null values in the sort
@@ -145,72 +156,77 @@ def edit(rows: list, duplicates: list, prefix: str, geom_type: str) -> list:
                 return (x['CREATED_DATE'] or _null_date)
 
         sort_1 = _merge(x)
-        sort_2 = geom_sorter(geom_type)
+        sort_2 = geom_sorter(self.geom_type)
         sort_3 = (x['LAST_EDITED_DATE'] or _null_date)
 
         return (sort_1, sort_2, sort_3)
 
-    # Summarize IDs in the table
-    used_ids, unused_ids = get_ids()
-    # Initialize a list of rows that will need edits
-    edited = list()
+    def edit(self):
+        """Iterates through a list of rows, editing incorrect or
+        duplicated entries along the way.
 
-    # ------------------
-    # EDITING DUPLICATES
-    # ------------------
-    # In order to be analyzed for duplication, the ID must have the
-    # correct prefix
-    if duplicates:
-        # Identify rows that contain duplicate FACILITYIDs
-        dup_rows = [row for row in rows if row['GLOBALID']
-                    in duplicates and row['FACILITYID']['prefix'] == prefix]
-        # Perform the sort
-        dup_rows.sort(key=sorter)
-        # Iterate through each unique ID in the duplicated rows
-        distinct = set([_merge(r) for r in dup_rows])
-        for i in distinct:
-            chunk = [x for x in dup_rows if _merge(x) == i]
-            # The last ID of the list (e.g. 'chunk[-1]'), does not need to be
-            # edited, since all of its dupes have been replaced
-            for c in chunk[:-1]:
-                # Modify 'rows' input at function call so that they are not
-                # inspected later on
-                edit_row = rows.pop(rows.index(c))
-                new_id = apply_id(used_ids, unused_ids)
+        This method edits duplicated FACILITYIDs first, followed by
+        incorrect or missing FACILITYIDs. It also modifies the following
+        attributes of the class: rows, used, unused, and edited.
+        Ultimately the edited attribute will be populated if edits were
+        made to the table.
+
+        The method knows to edit incorrect IDs based on the following
+        criteria:
+
+        Prefix is not capitalized
+        Prefix of the row does not exist
+        Prefix does not equal the layer's designated prefix
+        The ID does not exist
+        The ID has leading zeros
+        The ID has already been used
+        """
+
+        if self.duplicates:
+            # Identify rows that contain duplicate FACILITYIDs with the correct
+            # prefix
+            dup_rows = [row for row in self.rows if row['GLOBALID']
+                        in self.duplicates and row['FACILITYID']['prefix']
+                        == self.prefix]
+            # Perform the sort
+            dup_rows.sort(key=self.duplicate_sorter)
+            # Iterate through each unique ID in the duplicated rows
+            distinct = set([_merge(r) for r in dup_rows])
+            for i in distinct:
+                chunk = [x for x in dup_rows if _merge(x) == i]
+                # The last ID of the list (e.g. 'chunk[-1]'), does not need to
+                # be edited, since all of its dupes have been replaced
+                for c in chunk[:-1]:
+                    # Modify 'rows' input at Class instantiation so that they
+                    # are not inspected later on
+                    edit_row = self.rows.pop(self.rows.index(c))
+                    new_id = self.get_new_id()
+                    edit_row["FACILITYID"]["int_id"] = new_id
+                    edit_row["FACILITYID"]["str_id"] = str(new_id)
+                    self.edited.append(edit_row)
+
+        while self.rows:
+            edit_row = self.rows.pop(0)
+            # Flag whether edits need to be made to the row
+            # Assume no edits to start
+            edits = False
+            pfix = edit_row["FACILITYID"]["prefix"]
+            str_id = edit_row["FACILITYID"]["str_id"]
+            int_id = edit_row["FACILITYID"]["int_id"]
+
+            # PREFIX EDITS
+            if not pfix or not pfix.isupper() or pfix != self.prefix:
+                edit_row["FACILITYID"]["prefix"] = self.prefix
+                edits = True
+
+            # ID EDITS
+            tests = [not str_id, len(str_id) != len(str(int_id)),
+                     int_id in self.used]
+            if any(tests):
+                new_id = self.get_new_id()
                 edit_row["FACILITYID"]["int_id"] = new_id
                 edit_row["FACILITYID"]["str_id"] = str(new_id)
-                edited.append(edit_row)
+                edits = True
 
-    # ------------------------
-    # EDITING INCORRECT FACIDS
-    # ------------------------
-    # Prefix of the row does not exist
-    # Prefix is not capitalized
-    # Prefix does not equal the layer's designated prefix
-    # The ID does not exist
-    # The ID has leading zeros
-    # The ID has already been used
-    while rows:
-        row = rows.pop(0)
-        # Boolean describing whether edits needed to be made for the row
-        edits = False
-        pfix = row["FACILITYID"]["prefix"]
-        str_id = row["FACILITYID"]["str_id"]
-        int_id = row["FACILITYID"]["int_id"]
-
-        # PREFIX EDITS
-        if not pfix or not pfix.isupper() or pfix != prefix:
-            row["FACILITYID"]["prefix"] = prefix
-            edits = True
-
-        # ID EDITS
-        if not str_id or len(str_id) != len(str(int_id)) or int_id in used_ids:
-            new_id = apply_id(used_ids, unused_ids)
-            row["FACILITYID"]["int_id"] = new_id
-            row["FACILITYID"]["str_id"] = str(new_id)
-            edits = True
-
-        if edits:
-            edited.append(row)
-
-        return edited
+            if edits:
+                self.edited.append(edit_row)
