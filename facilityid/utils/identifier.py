@@ -73,8 +73,8 @@ class Identifier:
     def get_duplicates(self):
         # Initialize an executor object for SDE
         execute_object = ArcSDESQLExecute(self.connection)
-        query = f"""SELECT a.GLOBALID,
-                    a.FACILITYID
+        query = f"""SELECT a.FACILITYID,
+                    a.GLOBALID
                     FROM {self.database_name} a
                     JOIN (SELECT FACILITYID,
                         GLOBALID,
@@ -85,8 +85,11 @@ class Identifier:
                     ON a.GLOBALID = b.GLOBALID"""
         try:
             result = execute_object.execute(query)
-            return result
+            duplicates = [{'GLOBALID': r[1], 'FACILITYID': r[0]}
+                          for r in result]
+            return duplicates
         except (ExecuteError, TypeError, AttributeError):
+            # TODO: Add logging
             return None
 
     def get_rows(self):
