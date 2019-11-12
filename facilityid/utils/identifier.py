@@ -85,12 +85,11 @@ class Identifier:
                     ON a.GLOBALID = b.GLOBALID"""
         try:
             result = execute_object.execute(query)
-            duplicates = [{'GLOBALID': r[1], 'FACILITYID': r[0]}
-                          for r in result]
-            return duplicates
+            globalids = [r[1] for r in result]
+            return globalids
         except (ExecuteError, TypeError, AttributeError):
             # TODO: Add logging
-            return None
+            return list()
 
     def get_rows(self):
         """Extracts a feature's table for analysis
