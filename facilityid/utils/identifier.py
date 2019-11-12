@@ -27,6 +27,8 @@ class Identifier:
         self.has_globalid = True if "GLOBALID" in self.fields else False
         self.has_table = True if self.datasetType in [
             'FeatureClass', 'Table'] else False
+        self.shape = self.shapeType if self.datasetType == 'FeatureClass' \
+            else ''
         self.has_records = True if self.record_count(
         ) is not None or self.record_count() >= 1 else False
         self.prefix = self.find_prefix()

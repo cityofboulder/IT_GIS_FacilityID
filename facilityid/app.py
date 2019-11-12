@@ -5,8 +5,10 @@ import json
 import getpass
 from datetime import datetime
 
-from .utils.management import delete_facilityid_versions, clear_layers_from_map, find_in_sde
+from .utils.management import (delete_facilityid_versions,
+                               clear_layers_from_map, find_in_sde)
 from .utils.identifier import Identifier
+from .utils.edit import Edit
 
 """Read in config.json and assign values to variables"""
 with open('config.json') as config_file:
@@ -69,10 +71,11 @@ def main():
             # TODO: log that the layer will not be analyzed
             continue
 
-        # Step 4c: Extract rows
+        # Step 4c: Extract rows, identify duplicates
         table = facilityid.get_rows()
-
-        # Step 4d: Identify the GLOBALIDs of duplicated FACIDs
         duplicates = facilityid.get_duplicates()
 
-        # Step 4e: Make edits to each row
+        # Step 4d: Make edits to the table
+        editor = Edit(table, duplicates, facilityid.prefix, facilityid.shape)
+        editor.edit()
+        edited_rows = editor.edited
