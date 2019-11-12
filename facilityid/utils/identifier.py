@@ -85,7 +85,7 @@ class Identifier:
                     ON a.GLOBALID = b.GLOBALID"""
         try:
             result = execute_object.execute(query)
-            globalids = [r[1] for r in result]
+            globalids = [r[1] for r in result if r[0]]
             return globalids
         except (ExecuteError, TypeError, AttributeError):
             # TODO: Add logging
