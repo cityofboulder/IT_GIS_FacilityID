@@ -1,5 +1,7 @@
 from datetime import datetime
 
+from .identifier import Identifier
+
 
 def _merge(x):
     """Concatenate an ID back together."""
@@ -17,7 +19,7 @@ def _get_values(rows: list, field: str) -> list:
     return values
 
 
-class Edit:
+class Edit(Identifier):
     """A class meant to be used once a table has been slated for edits.
 
     Parameters
@@ -40,11 +42,10 @@ class Edit:
         A reverse sorted list of unused IDs between the min and max of
         used IDs
     """
-    def __init__(self, rows, duplicates, prefix, geom_type):
-        self.rows = rows
-        self.duplicates = duplicates
-        self.prefix = prefix
-        self.geom_type = geom_type
+    def __init__(self, tuple_path):
+        super().__init__(tuple_path)
+        self.rows = self.rows()
+        self.duplicates = self.duplicates()
         self.used = self._used()
         self.unused = self._unused()
 
