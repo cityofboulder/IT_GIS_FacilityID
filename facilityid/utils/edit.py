@@ -14,14 +14,6 @@ def _merge(x):
     i = x['FACILITYID']['str_id']
     return p + i
 
-# TODO: get rid of 'get' in this function
-def _get_values(rows: list, field: str) -> list:
-    """An internal function for returning all values of a particular
-    column of the table."""
-
-    values = [r[field] for r in rows]
-    return values
-
 
 class Edit(Identifier):
     """A class meant to be used once a table has been slated for edits.
