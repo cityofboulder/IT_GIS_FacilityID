@@ -124,7 +124,7 @@ class Identifier:
             # TODO: Add info logging
             return None
 
-    def get_duplicates(self):
+    def duplicates(self):
         # Initialize an executor object for SDE
         execute_object = ArcSDESQLExecute(self.connection)
         query = f"""SELECT a.FACILITYID,
@@ -145,7 +145,7 @@ class Identifier:
             # TODO: Add logging
             return list()
 
-    def get_rows(self):
+    def rows(self):
         """Extracts a feature's table for analysis
 
         Extracts FACILITYID, GLOBALID, edit metadata, and SHAPE fields

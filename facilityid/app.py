@@ -76,15 +76,15 @@ def main():
                       facilityid.has_globalid,
                       facilityid.editorTrackingEnabled,
                       facilityid.prefix]
-        non_essentials = [facilityid.isVersioned,
-                          facilityid.can_gisscr_edit(edit_connection)]
+        # non_essentials = [facilityid.isVersioned,
+        #                   facilityid.can_gisscr_edit(edit_connection)]
         if not all(essentials):
             # TODO: log that the layer will not be analyzed
             continue
 
         # Step 4c: Extract rows, identify duplicates
-        table = facilityid.get_rows()
-        duplicates = facilityid.get_duplicates()
+        table = facilityid.rows()
+        duplicates = facilityid.duplicates()
 
         # Step 4d: Make edits to the table
         editor = Edit(table, duplicates, facilityid.prefix, facilityid.shape)
