@@ -15,23 +15,18 @@ class Identifier:
         self.tuple_path = tuple_path
         self.full_path = os.path.join(*self.tuple_path)
         self.connection = self.tuple_path[0]
-        self.dataset = self.tuple_path[1] if len(
-            self.tuple_path) == 3 else None
-        self.owner, self.name = tuple_path[-1].split(".")
-        self.database_name = ".".join([self.owner, self.name[:26]]).upper() + \
-            "_EVW" if self.isVersioned else ".".join(
-                [self.owner, self.name[:30]]).upper()
+        self.dataset = self._dataset()
+        self.feature_name = self.tuple_path[-1]
+        self.owner = self._owner()
+        self.name = self._name()
+        self.database_name = self._database_name()
+        self.shape = self._shape()
 
+        self.has_table = self.datasetType in ['FeatureClass', 'Table']
         self.fields = [f.name for f in ListFields(self.full_path)]
-        self.has_facilityid = True if "FACILITYID" in self.fields else False
-        self.has_globalid = True if "GLOBALID" in self.fields else False
-        self.has_table = True if self.datasetType in [
-            'FeatureClass', 'Table'] else False
-        self.shape = self.shapeType if self.datasetType == 'FeatureClass' \
-            else ''
-        self.has_records = True if self.record_count(
-        ) is not None or self.record_count() >= 1 else False
-        self.prefix = self.find_prefix()
+        self.has_facilityid = "FACILITYID" in self.fields
+        self.has_globalid = "GLOBALID" in self.fields
+        self.prefix = self._prefix()
 
         self._desc = Describe(self.full_path)
 
@@ -40,19 +35,64 @@ class Identifier:
         underlying Describe object"""
         return getattr(self._desc, item)
 
-    def record_count(self) -> bool:
-        """Determines if there are any records in the feature class to
-        analyze."""
-        execute_object = ArcSDESQLExecute(self.connection)
-        try:
-            query = f"""SELECT COUNT(*) FROM {self.database_name}"""
-            result = execute_object.execute(query)
-            return int(result)
-        except ExecuteError:
-            # TODO: Add info logging
-            return None
+    def _database(self):
+        """Return the database client name"""
+        parts = self.feature_name.split('.')
 
-    def find_prefix(self):
+        # SQL Server follows the pattern db.owner.name
+        if len(parts) == 3:
+            db = 'MSSQL'
+        # Oracle follows the pattern owner.name
+        else:
+            db = 'ORACLE'
+
+        return db
+
+    def _dataset(self):
+        """Return the name of the dataset, if it exists"""
+        return self.tuple_path[1] if len(self.tuple_path) == 3 else None
+
+    def _owner(self):
+        """Get the name of the feature's owner"""
+        parts = self.feature_name.split('.')
+
+        if self._database() == 'MSSQL':
+            owner = parts[1]
+        if self._database() == 'ORACLE':
+            owner = parts[0]
+
+        return owner
+
+    def _name(self):
+        """Get the name of the feature"""
+        return self.feature_name.split('.')[-1]
+
+    def _database_name(self):
+        """Get the name of the layer inside the spatial database.
+
+        Output will be different depending on whether SQL Spatial or
+        Oracle databases are being used. Oracle imposed a 30 char limit
+        on table names, while SQL Server has a 120 char limit.
+
+        Returns:
+        --------
+        str
+            The name of the table inside the database.
+        """
+
+        name = ".".join([self.owner, self.name[:128]]).upper()
+        if self._database() == 'ORACLE':
+            if self.isVersioned:
+                name = ".".join([self.owner, self.name[:26]]).upper() + "_EVW"
+            else:
+                name = ".".join([self.owner, self.name[:30]]).upper()
+
+        return name
+
+    def _shape(self):
+        return self.shapeType if self.datasetType == 'FeatureClass' else ''
+
+    def _prefix(self):
         """Determines the prefix of the feature class based on the most
         prevalent occurrence."""
         if self.has_facilityid:
@@ -70,6 +110,18 @@ class Identifier:
             except (ExecuteError, TypeError, AttributeError):
                 return None
         else:
+            return None
+
+    def record_count(self) -> bool:
+        """Determines if there are any records in the feature class to
+        analyze."""
+        execute_object = ArcSDESQLExecute(self.connection)
+        try:
+            query = f"""SELECT COUNT(*) FROM {self.database_name}"""
+            result = execute_object.execute(query)
+            return int(result)
+        except ExecuteError:
+            # TODO: Add info logging
             return None
 
     def get_duplicates(self):
