@@ -45,10 +45,10 @@ class Edit:
         self.duplicates = duplicates
         self.prefix = prefix
         self.geom_type = geom_type
-        self.used = self.get_used()
-        self.unused = self.get_unused()
+        self.used = self._used()
+        self.unused = self._unused()
 
-    def get_used(self):
+    def _used(self):
         """Extracts a list of used ids in rows, sorted in reverse order.
 
         Returns
@@ -62,7 +62,7 @@ class Edit:
             reverse=True)
         return all_used
 
-    def get_unused(self) -> list:
+    def _unused(self) -> list:
         """Extracts a list of unused ids that lie between the minimum
         and maximum ids in order to backfill gaps in ID sequences.
 
@@ -87,7 +87,7 @@ class Edit:
 
         return unused
 
-    def get_new_id(self) -> int:
+    def _new_id(self) -> int:
         """Finds the next best ID to apply to a row with missing or
         duplicated IDs.
 
@@ -118,7 +118,7 @@ class Edit:
 
         return new_id
 
-    def duplicate_sorter(self, x):
+    def _sorter(self, x):
         """A function meant to be used in the builtin sort function for
         lists.
 
@@ -192,7 +192,7 @@ class Edit:
                         in self.duplicates and row['FACILITYID']['prefix']
                         == self.prefix]
             # Perform the sort
-            dup_rows.sort(key=self.duplicate_sorter)
+            dup_rows.sort(key=self._sorter)
             # Iterate through each unique ID in the duplicated rows
             distinct = set([_merge(r) for r in dup_rows])
             for i in distinct:
@@ -203,7 +203,7 @@ class Edit:
                     # Modify 'rows' input at Class instantiation so that they
                     # are not inspected later on
                     edit_row = self.rows.pop(self.rows.index(c))
-                    new_id = self.get_new_id()
+                    new_id = self._new_id()
                     edit_row["FACILITYID"]["int_id"] = new_id
                     edit_row["FACILITYID"]["str_id"] = str(new_id)
                     edited.append(edit_row)
@@ -226,7 +226,7 @@ class Edit:
             tests = [not str_id, len(str_id) != len(str(int_id)),
                      int_id in self.used]
             if any(tests):
-                new_id = self.get_new_id()
+                new_id = self._new_id()
                 edit_row["FACILITYID"]["int_id"] = new_id
                 edit_row["FACILITYID"]["str_id"] = str(new_id)
                 edits = True
