@@ -1,5 +1,9 @@
+import os
+
 from datetime import datetime
 
+from arcpy import ClearWorkspaceCache_management
+from arcpy.da import Editor, UpdateCursor
 from .identifier import Identifier
 
 
@@ -10,7 +14,7 @@ def _merge(x):
     i = x['FACILITYID']['str_id']
     return p + i
 
-
+# TODO: get rid of 'get' in this function
 def _get_values(rows: list, field: str) -> list:
     """An internal function for returning all values of a particular
     column of the table."""
@@ -236,3 +240,43 @@ class Edit(Identifier):
                 edited.append(edit_row)
 
         return edited
+
+    def edit_version(self, records: list, edits_authorized: bool = False):
+
+        guid_to_facid = {x['GLOBALID']: _merge(x) for x in records}
+        version_name = f"{self.user}_FacilityID"
+        connection_file = os.path.join(os.getcwd, f"{version_name}.sde")
+
+        # TODO: Add code to create a version and database connection file
+
+        if edits_authorized:
+            try:
+                # Start an arc edit session
+                editor = Editor(connection_file)
+                editor.startEditing(False, True)
+                editor.startOperation()
+
+                # Query only the entries that need editing
+                guids = ", ".join(f"'{x}'" for x in guid_to_facid.keys())
+                query = f"GLOBALID IN ({guids})"
+
+                # Open an update cursor and perform edits
+                fields = ["GLOBALID", "FACILITYID"]
+                with UpdateCursor(self.full_path, fields, query) as cursor:
+                    for row in cursor:
+                        row[1] = guid_to_facid[row[0]]
+                        cursor.updateRow(row)
+
+                # Stop the edit operation
+                editor.stopOperation()
+                editor.stopEditing(True)
+                del editor
+                ClearWorkspaceCache_management()
+
+                # TODO: Add logging for successful versioned edit
+            except RuntimeError:
+                # TODO: Add logging for unsuccessful versioned edits
+                pass
+        else:
+            # Add logging for versioned edits not being authorized
+            pass
