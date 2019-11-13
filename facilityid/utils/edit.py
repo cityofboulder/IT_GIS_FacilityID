@@ -39,9 +39,6 @@ class Edit:
     unused : list
         A reverse sorted list of unused IDs between the min and max of
         used IDs
-    edited : list
-        A list of dicts, where each dict represents a row that has had
-        its FACILITYID changed.
     """
     def __init__(self, rows, duplicates, prefix, geom_type):
         self.rows = rows
@@ -50,7 +47,6 @@ class Edit:
         self.geom_type = geom_type
         self.used = self.get_used()
         self.unused = self.get_unused()
-        self.edited = list()
 
     def get_used(self):
         """Extracts a list of used ids in rows, sorted in reverse order.
@@ -180,8 +176,15 @@ class Edit:
         The ID does not exist
         The ID has leading zeros
         The ID has already been used
+
+        Returns
+        -------
+        list
+            A list of dicts, where each dict represents a row that has
+            had its FACILITYID changed.
         """
 
+        edited = list()
         if self.duplicates:
             # Identify rows that contain duplicate FACILITYIDs with the correct
             # prefix
@@ -203,7 +206,7 @@ class Edit:
                     new_id = self.get_new_id()
                     edit_row["FACILITYID"]["int_id"] = new_id
                     edit_row["FACILITYID"]["str_id"] = str(new_id)
-                    self.edited.append(edit_row)
+                    edited.append(edit_row)
 
         while self.rows:
             edit_row = self.rows.pop(0)
@@ -229,4 +232,6 @@ class Edit:
                 edits = True
 
             if edits:
-                self.edited.append(edit_row)
+                edited.append(edit_row)
+
+        return edited
