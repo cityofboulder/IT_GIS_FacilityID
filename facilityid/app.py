@@ -77,5 +77,9 @@ def main():
 
         # Step 4d: Make edits to the table
         editor = Edit(table, duplicates, facilityid.prefix, facilityid.shape)
-        editor.edit()
-        edited_rows = editor.edited
+        edited_rows = editor.edit()
+
+        # Step 4e: Incorporate edits into a version
+        if edited_rows:
+            # TODO: Add method call to make versioned edits
+            pass
