@@ -9,7 +9,7 @@ from arcpy import (CreateVersion_management, DeleteVersion_management,
 aprx_location = "./EditFacilityID.aprx"
 
 
-def find_in_sde(sde_path: str, includes: list = None, excludes: list = None) -> list:
+def find_in_sde(sde_path: str, includes: list = [], excludes: list = []) -> list:
     """ Finds all possible feature classes within the sde connection provided based on a list of pattern matches, and
     returns a list representing that file path broken into [sde, dataset (if it exists), feature class]. For example,
     the requester might only want to find the path of feature classes that contain "wF", "sw", and "Flood". If no
@@ -34,14 +34,16 @@ def find_in_sde(sde_path: str, includes: list = None, excludes: list = None) -> 
 
     # Make sure that the output includes or excludes the keywords provided at
     # function call
+    assert set(includes).isdisjoint(set(excludes))
     if includes:
         items = [i for i in items if any(
             arg.lower() in os.path.join(*i).lower() for arg in includes)]
     if excludes:
-        items = [i for i in items if any(
-            arg.lower() not in os.path.join(*i).lower() for arg in includes)]
+        items = [i for i in items if not any(
+            arg.lower() in os.path.join(*i).lower() for arg in excludes)]
 
-    return items.sort(key=lambda x: x[-1])
+    items.sort(key=lambda x: x[-1])
+    return items
 
 
 def create_versioned_connection(client: str, database: str,
