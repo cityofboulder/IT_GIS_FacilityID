@@ -1,7 +1,8 @@
 import os
 from arcpy.da import Walk
 from arcpy.mp import ArcGISProject
-from arcpy import DeleteVersion_management, ListVersions
+from arcpy import (CreateVersion_management, DeleteVersion_management,
+                   ListVersions, CreateDatabaseConnection_management)
 
 
 # Define globals specific to these functions
@@ -41,6 +42,51 @@ def find_in_sde(sde_path: str, includes: list = None, excludes: list = None) -> 
             arg.lower() not in os.path.join(*i).lower() for arg in includes)]
 
     return items.sort(key=lambda x: x[-1])
+
+
+def create_versioned_connection(client: str, database: str,
+                                database_user: str, password: str,
+                                version_name: str, parent: str,
+                                source_connection: str):
+    """Create a version and associated versioned database connection.
+
+    Parameters
+    ----------
+    client : str
+        The database client being used (e.g. ORACLE or SQLSERVER)
+    database : str
+        The instance of the database to use
+    database_user : str
+        The connecting user to the database instance
+    password : str
+        The password for the database user
+    version_name : str
+        The name of the version
+    parent : str
+        The parent of the version
+    source_connection : str
+        The connection file used to create the version
+    """
+
+    # Create the version first
+    CreateVersion_management(in_workspace=source_connection,
+                             parent_version=parent,
+                             version_name=version_name,
+                             access_permission='PRIVATE')
+
+    full_version_name = f"GISSCR.{version_name}"
+    connection_name = f"{version_name}.sde"
+    connection_file = os.path.join(os.getcwd(), connection_name)
+    if not os.path.exists(connection_file):
+        CreateDatabaseConnection_management(out_folder_path=os.getcwd(),
+                                            out_name=connection_name,
+                                            database_platform=client,  # 'ORACLE'
+                                            instance=database,  # 'gisprod2'
+                                            account_authentication='DATABASE_AUTH',
+                                            username=database_user,  # 'gisscr'
+                                            password=password,  # 'gKJTZkCYS937'
+                                            version_type='TRANSACTIONAL',
+                                            version=full_version_name)
 
 
 def delete_facilityid_versions(connection: str = None) -> None:
