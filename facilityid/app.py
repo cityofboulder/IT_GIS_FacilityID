@@ -3,15 +3,15 @@
 # TODO: figure out how to download the boulder_gis package into conda env
 import json
 import getpass
-from datetime import datetime
+import datetime
 
-from .utils.management import (delete_facilityid_versions,
-                               clear_layers_from_map, find_in_sde)
-from .utils.identifier import Identifier
-from .utils.edit import Edit
+from utils.management import (delete_facilityid_versions,
+                              clear_layers_from_map, find_in_sde)
+from utils.identifier import Identifier
+from utils.edit import Edit
 
 """Read in config.json and assign values to variables"""
-with open('config.json') as config_file:
+with open(r'.\facilityid\config.json') as config_file:
     configs = json.load(config_file)
 
 # Boolean for scripted post control
@@ -28,8 +28,8 @@ scan_mode = [k for k, v in configs["mode"].items() if v]
 authorize_scripted_edits = [k for k, v in configs["users"].items() if v]
 
 # Designate which users to check IDs for
-users_to_check = configs["users"].keys(
-) if "scan_by_user" in scan_mode else list()
+users_to_check = [f'{n}.' for n in configs["users"].keys(
+)] if "scan_by_user" in scan_mode else list()
 
 # Designate which data sets to check IDs for
 dsets_to_check = configs["dsets"] if "scan_by_dset" in scan_mode else list()
@@ -45,8 +45,8 @@ filters = users_to_check + dsets_to_check + feats_to_check
 username = getpass.getuser()
 
 # Day and time script was run
-start_date_string = datetime.now().strftime("%Y%m%d")
-start_time_string = datetime.now().strftime('%H%M')
+start_date_string = datetime.datetime.now().strftime("%Y%m%d")
+start_time_string = datetime.datetime.now().strftime('%H%M')
 
 # Define what a row in the sde checklist looks like
 checklist_row = configs["checklist"]
@@ -86,3 +86,6 @@ def main():
         editor = Edit(feature)
         authorized = editor.owner in authorize_scripted_edits
         editor.edit_version(authorized)
+
+
+main()
