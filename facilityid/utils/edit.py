@@ -154,7 +154,7 @@ class Edit(Identifier):
 
         return (sort_1, sort_2, sort_3)
 
-    def edit(self):
+    def _edit(self):
         """Iterates through a list of rows, editing incorrect or
         duplicated entries along the way.
 
@@ -233,42 +233,47 @@ class Edit(Identifier):
 
         return edited
 
-    def edit_version(self, records: list, edits_authorized: bool = False):
+    def edit_version(self, edits_authorized: bool = False):
 
-        guid_to_facid = {x['GLOBALID']: _merge(x) for x in records}
-        version_name = f"{self.user}_FacilityID"
-        connection_file = os.path.join(os.getcwd, f"{version_name}.sde")
+        records = self._edit()
+        if records:
+            guid_to_facid = {x['GLOBALID']: _merge(x) for x in records}
 
-        # TODO: Add code to create a version and database connection file
+            if edits_authorized:
+                version_name = f"{self.user}_FacilityID"
+                conn_file = os.path.join(os.getcwd, f"{version_name}.sde")
+                # TODO: Add code to create a versioned database connection
+                try:
+                    # Start an arc edit session
+                    editor = Editor(conn_file)
+                    editor.startEditing(False, True)
+                    editor.startOperation()
 
-        if edits_authorized:
-            try:
-                # Start an arc edit session
-                editor = Editor(connection_file)
-                editor.startEditing(False, True)
-                editor.startOperation()
+                    # Query only the entries that need editing
+                    guids = ", ".join(f"'{x}'" for x in guid_to_facid.keys())
+                    query = f"GLOBALID IN ({guids})"
 
-                # Query only the entries that need editing
-                guids = ", ".join(f"'{x}'" for x in guid_to_facid.keys())
-                query = f"GLOBALID IN ({guids})"
+                    # Open an update cursor and perform edits
+                    fields = ["GLOBALID", "FACILITYID"]
+                    with UpdateCursor(self.full_path, fields, query) as cursor:
+                        for row in cursor:
+                            row[1] = guid_to_facid[row[0]]
+                            cursor.updateRow(row)
 
-                # Open an update cursor and perform edits
-                fields = ["GLOBALID", "FACILITYID"]
-                with UpdateCursor(self.full_path, fields, query) as cursor:
-                    for row in cursor:
-                        row[1] = guid_to_facid[row[0]]
-                        cursor.updateRow(row)
+                    # Stop the edit operation
+                    editor.stopOperation()
+                    editor.stopEditing(True)
+                    del editor
+                    ClearWorkspaceCache_management()
 
-                # Stop the edit operation
-                editor.stopOperation()
-                editor.stopEditing(True)
-                del editor
-                ClearWorkspaceCache_management()
-
-                # TODO: Add logging for successful versioned edit
-            except RuntimeError:
-                # TODO: Add logging for unsuccessful versioned edits
+                    # TODO: Add logging for successful versioned edit
+                except RuntimeError:
+                    # TODO: Add logging for unsuccessful versioned edits
+                    pass
+            else:
+                # TODO: Add logging for versioned edits not being authorized
                 pass
+            # TODO: Join records to layer
         else:
-            # Add logging for versioned edits not being authorized
+            # TODO: Add logging that edits were not necessary
             pass

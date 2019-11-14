@@ -79,18 +79,10 @@ def main():
         # non_essentials = [facilityid.isVersioned,
         #                   facilityid.can_gisscr_edit(edit_connection)]
         if not all(essentials):
-            # TODO: log that the layer will not be analyzed
+            # TODO: log that the layer does not meet requirements for analysis
             continue
 
-        # Step 4c: Extract rows, identify duplicates
-        table = facilityid.rows()
-        duplicates = facilityid.duplicates()
-
-        # Step 4d: Make edits to the table
-        editor = Edit(table, duplicates, facilityid.prefix, facilityid.shape)
-        edited_rows = editor.edit()
-
-        # Step 4e: Incorporate edits into a version
-        if edited_rows:
-            # TODO: Add method call to make versioned edits
-            pass
+        # Step 4c: Make edits to the version
+        editor = Edit(feature)
+        authorized = editor.owner in authorize_scripted_edits
+        editor.edit_version(authorized)
