@@ -9,17 +9,30 @@ from arcpy import (CreateVersion_management, DeleteVersion_management,
 aprx_location = "./EditFacilityID.aprx"
 
 
-def find_in_sde(sde_path: str, includes: list = [], excludes: list = []) -> list:
-    """ Finds all possible feature classes within the sde connection provided based on a list of pattern matches, and
-    returns a list representing that file path broken into [sde, dataset (if it exists), feature class]. For example,
-    the requester might only want to find the path of feature classes that contain "wF", "sw", and "Flood". If no
-    patterns are provided, the function will return all feature classes in the sde_path.
+def find_in_sde(sde_path: str, includes: list = [], excludes: list = []):
+    """Finds all possible feature classes within the sde connection
+    provided,  based on lists of pattern matches.
 
-    :param sde_path: The file path to the sde connection file
-    :param includes: A list of optional strings that all output must contain
-    :param excludes: A list of optional strings that all output cannot contain
-    :return: A list of tuples representing (root dir, dataset, feature)
+   If no patterns are provided, the function will return all feature
+   classes in the sde_path.
+
+    Parameters
+    ----------
+    sde_path : str
+        The file path to the sde connection file
+    includes : list, optional
+        A list of optional strings that all output must contain, by
+        default []
+    excludes : list, optional
+        A list of optional strings that all output cannot contain, by
+        default []
+
+    Returns
+    -------
+    list
+        Tuples representing (sde, dataset, feature) or (sde, feature)
     """
+
     walker = Walk(sde_path, ['FeatureDataset', 'FeatureClass'])
     items = list()
     for directory, _, files in walker:
@@ -94,9 +107,12 @@ def create_versioned_connection(client: str, database: str,
 def delete_facilityid_versions(connection: str = None) -> None:
     """Deletes versions created for editing Facility IDs
 
-    :param connection: location of the sde connection file
-    :return: None
+    Parameters
+    ----------
+    connection : str
+        location of the sde connection file
     """
+
     del_versions = [v for v in ListVersions(connection) if "FacilityID" in v]
     for d in del_versions:
         DeleteVersion_management(connection, d)
@@ -104,13 +120,16 @@ def delete_facilityid_versions(connection: str = None) -> None:
 
 # TODO: verify that add_layer_to_map works
 def add_layer_to_map(feature_class_name: str = None) -> None:
-    """ Adds the input layer to a .aprx Map based on the owner of the data.
-    For example, the UTIL.wFitting feature would be added to the "UTIL" map
-    in the designated .aprx
+    """ Adds the input layer to a .aprx Map based on the owner of the
+    data.  For example, the UTIL.wFitting feature would be added to the
+    "UTIL" map of the designated .aprx file
 
-    :param feature_class_name: Name of the feature class inside sde
-    :return:
+    Parameters
+    ----------
+    feature_class_name : str
+        The full name of the feature class inside sde (e.g. UTIL.wFitting)
     """
+
     user, fc = feature_class_name.split(".")
     aprx = ArcGISProject(aprx_location)
     user_map = aprx.listMaps(f"{user}")[0]
