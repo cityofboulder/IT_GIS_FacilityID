@@ -1,22 +1,11 @@
 # TODO: place globals into yml config file
 # TODO: transfer items from personal modules into a project utilities module
 # TODO: figure out how to download the boulder_gis package into conda env
-import getpass
-import datetime
-
 import config
 from utils.management import (delete_facilityid_versions,
                               clear_layers_from_map, find_in_sde)
 from utils.identifier import Identifier
 from utils.edit import Edit
-
-"""Define variables that are constant throughout the script"""
-# User who initiated the script
-username = getpass.getuser()
-
-# Day and time script was run
-start_date_string = datetime.datetime.now().strftime("%Y%m%d")
-start_time_string = datetime.datetime.now().strftime('%H%M')
 
 
 def main():
