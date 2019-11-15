@@ -32,10 +32,11 @@ In the Command Prompt, change directories to the facilityid download:
 cd /d path\to\facilityid
 ```
 
-Now, still in Command Prompt, enter into the conda environment created especially for this package:
+Now, still in Command Prompt, enter into the conda environment created especially for this package, and download the package requirements:
 
 ```
-conda activate facilityid_env
+activate facilityid_env
+conda install pyyaml
 ```
 
 Lastly, tell Python to do its thing!

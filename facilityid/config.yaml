@@ -15,21 +15,20 @@ authorizes_edits:
 
 # Will edits all come from a single parent or multiple parents?
 single_parent: True
-edit_tree:
-  single_parent:
-    SDE.DEFAULT:
-      include: ["UTIL.", "TRANS.", "PW.", "PARKS."]
-      exclude: []
-  multi_parents:
-    WEBEDITOR.Esri_Anonymous_util/BHSewer:
-      include: ["UTIL.SEWER"]
-      exclude: []
-    WEBEDITOR.Esri_Anonymous_util/BHStorm:
-      include: ["UTIL.STORMWATER"]
-      exclude: []
-    WEBEDITOR.Esri_Anonymous_util/BHWater:
-      include: ["UTIL.WATERDISTRIBUTION"]
-      exclude: []
-    SDE.DEFAULT:
-      include: []
-      exclude: ["UTIL.SEWER", "UTIL.STORMWATER",  "UTIL.WATERDISTRIBUTION"]
+single:
+  SDE.DEFAULT:
+    include: ["UTIL.", "TRANS.", "PW.", "PARKS."]
+    exclude: []
+multiple: 
+  WEBEDITOR.Esri_Anonymous_util/BHSewer:
+    include: ["UTIL.SEWER"]
+    exclude: []
+  WEBEDITOR.Esri_Anonymous_util/BHStorm:
+    include: ["UTIL.STORMWATER"]
+    exclude: []
+  WEBEDITOR.Esri_Anonymous_util/BHWater:
+    include: ["UTIL.WATERDISTRIBUTION"]
+    exclude: []
+  SDE.DEFAULT:
+    include: []
+    exclude: ["UTIL.SEWER", "UTIL.STORMWATER", "UTIL.WATERDISTRIBUTION"]
