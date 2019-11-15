@@ -242,6 +242,7 @@ class Edit(Identifier):
             if edits_authorized:
                 version_name = f"{self.user}_FacilityID"
                 conn_file = os.path.join(os.getcwd, f"{version_name}.sde")
+                edit_conn = os.path.join(conn_file, *self.tuple_path[1:])
                 # TODO: Add code to create a versioned database connection
                 try:
                     # Start an arc edit session
@@ -255,7 +256,7 @@ class Edit(Identifier):
 
                     # Open an update cursor and perform edits
                     fields = ["GLOBALID", "FACILITYID"]
-                    with UpdateCursor(self.full_path, fields, query) as cursor:
+                    with UpdateCursor(edit_conn, fields, query) as cursor:
                         for row in cursor:
                             row[1] = guid_to_facid[row[0]]
                             cursor.updateRow(row)
