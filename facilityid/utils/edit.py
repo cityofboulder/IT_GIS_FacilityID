@@ -45,6 +45,16 @@ class Edit(Identifier):
         self.used = self._used()
         self.unused = self._unused()
 
+    def __hash__(self):
+        return hash(self.__key())
+
+    def __eq__(self, other):
+        return self.__key() == other.__key()
+
+    def __key(self):
+        key = sorted(self.rows, key=lambda x: x['GLOBALID'])
+        return key
+
     def _used(self):
         """Extracts a list of used ids in rows, sorted in reverse order.
 
@@ -159,10 +169,9 @@ class Edit(Identifier):
         duplicated entries along the way.
 
         This method edits duplicated FACILITYIDs first, followed by
-        incorrect or missing FACILITYIDs. It also modifies the following
-        attributes of the class: rows, used, unused, and edited.
-        Ultimately the edited attribute will be populated if edits were
-        made to the table.
+        incorrect or missing FACILITYIDs. It also modifies the used and
+        unused attributes of the class. Ultimately the edited attribute
+        will be populated if edits were made to the table.
 
         The method knows to edit incorrect IDs based on the following
         criteria:
@@ -197,16 +206,15 @@ class Edit(Identifier):
                 # The last ID of the list (e.g. 'chunk[-1]'), does not need to
                 # be edited, since all of its dupes have been replaced
                 for c in chunk[:-1]:
-                    # Modify 'rows' input at Class instantiation so that they
-                    # are not inspected later on
-                    edit_row = self.rows.pop(self.rows.index(c))
+                    edit_row = self.rows[self.rows.index(c)]
                     new_id = self._new_id()
                     edit_row["FACILITYID"]["int_id"] = new_id
                     edit_row["FACILITYID"]["str_id"] = str(new_id)
                     edited.append(edit_row)
 
-        while self.rows:
-            edit_row = self.rows.pop(0)
+        for edit_row in self.rows:
+            if edit_row in edited:
+                continue
             # Flag whether edits need to be made to the row
             # Assume no edits to start
             edits = False

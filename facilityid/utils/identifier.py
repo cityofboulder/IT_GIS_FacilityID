@@ -156,7 +156,7 @@ class Identifier:
 
         Returns
         -------
-        list
+        tuple
             rows represented as dicitionaries
         """
 
@@ -205,7 +205,7 @@ class Identifier:
                                      "str_id": "",
                                      "int_id": None}
 
-        return row_list
+        return tuple(row_list)
 
     def can_gisscr_edit(self, connection) -> bool:
         """Reveals if the feature class is editable through the GISSCR connection.
