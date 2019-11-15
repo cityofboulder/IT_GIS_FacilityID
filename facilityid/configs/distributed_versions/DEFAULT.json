@@ -1,9 +1,0 @@
-{
-    "parent": "SDE.DEFAULT",
-    "include": [],
-    "exclude": [
-        "UTIL.SEWER",
-        "UTIL.STORMWATER",
-        "UTIL.WATERDISTRIBUTION"
-    ]
-}

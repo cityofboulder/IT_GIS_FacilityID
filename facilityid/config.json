@@ -1,0 +1,73 @@
+{
+  "post_edits": false,
+  "connections": {
+    "read": "S:\\GIS\\Share\\DatabaseConnections\\gis on gisprod2.sde",
+    "edit": "S:\\PW\\PWShare\\GIS\\Scripts\\dbconnections\\gisscr on gisprod2.sde"
+  },
+  "authorizes_edits": {
+    "UTIL": true,
+    "TRANS": true,
+    "PW": true,
+    "PARKS": false
+  },
+  "single_parent": true,
+  "edit_tree": {
+    "single": {
+      "SDE.DEFAULT": {
+        "include": [
+          "UTIL.",
+          "TRANS.",
+          "PW.",
+          "PARKS."
+        ],
+        "exclude": []
+      }
+    },
+    "multiple": {
+      "WEBEDITOR.Esri_Anonymous_util/BHSewer": {
+        "include": [
+          "UTIL.SEWER"
+        ],
+        "exclude": []
+      },
+      "WEBEDITOR.Esri_Anonymous_util/BHStorm": {
+        "include": [
+          "UTIL.STORMWATER"
+        ],
+        "exclude": []
+      },
+      "WEBEDITOR.Esri_Anonymous_util/BHWater": {
+        "include": [
+          "UTIL.WATERDISTRIBUTION"
+        ],
+        "exclude": []
+      },
+      "SDE.DEFAULT": {
+        "include": [],
+        "exclude": [
+          "UTIL.SEWER",
+          "UTIL.STORMWATER",
+          "UTIL.WATERDISTRIBUTION"
+        ]
+      }
+    }
+  },
+  "checklist": {
+    "0 - FEATURE CLASS": "",
+    "1 - PREFIX": "",
+    "2 - CHECK VERSIONED EDITS": "",
+    "3 - ENABLE GLOBALID": "",
+    "4 - REGISTER AS VERSIONED": "",
+    "5 - TURN ON EDITOR TRACKING": "",
+    "6 - RE-ENABLE ACCESS TO GIS USER": "",
+    "7 - GRANT GISSCR USER FULL PRIVILEGES": "",
+    "8 - FILL IN FACILITY ID VALUES": ""
+  },
+  "count": {
+    "0 - FEATURE CLASS": "",
+    "1 - VERSIONED EDITS": "",
+    "2 - EMPTY": 0,
+    "3 - INCORRECT": 0,
+    "4 - DUPLICATED": 0
+  }
+}

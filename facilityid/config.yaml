@@ -1,0 +1,35 @@
+# Post after making versioned edits?
+post_edits: False
+
+# SDE Connection file locations
+connections:
+  read: "S:\\GIS\\Share\\DatabaseConnections\\gis on gisprod2.sde"
+  edit: "S:\\PW\\PWShare\\GIS\\Scripts\\dbconnections\\gisscr on gisprod2.sde"
+
+# Users that authorize versioned edits
+authorizes_edits:
+  "UTIL": True
+  "TRANS": True
+  "PW": True
+  "PARKS": False
+
+# Will edits all come from a single parent or multiple parents?
+single_parent: True
+edit_tree:
+  single_parent:
+    SDE.DEFAULT:
+      include: ["UTIL.", "TRANS.", "PW.", "PARKS."]
+      exclude: []
+  multi_parents:
+    WEBEDITOR.Esri_Anonymous_util/BHSewer:
+      include: ["UTIL.SEWER"]
+      exclude: []
+    WEBEDITOR.Esri_Anonymous_util/BHStorm:
+      include: ["UTIL.STORMWATER"]
+      exclude: []
+    WEBEDITOR.Esri_Anonymous_util/BHWater:
+      include: ["UTIL.WATERDISTRIBUTION"]
+      exclude: []
+    SDE.DEFAULT:
+      include: []
+      exclude: ["UTIL.SEWER", "UTIL.STORMWATER",  "UTIL.WATERDISTRIBUTION"]
