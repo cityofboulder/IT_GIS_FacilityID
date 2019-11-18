@@ -36,10 +36,20 @@ def main():
                 # analysis
                 continue
 
-            # Step 4c: Make edits to the version
+            # Step 4c: Compare Edit object to previous script run
             editor = Edit(feature)
+            if editor.equals_previous():
+                continue
+
+            # Step 4d: Perform edits
             authorized = editor.owner in config.auth
             editor.edit_version(authorized)
+
+            # Step 4e: Shelve the edited object for future comparisons
+            editor.store_current()
+
+        # Step 5: Reconcile edits, and post depending on config
+        # TODO: Add a reconcile/post flow
 
 
 main()

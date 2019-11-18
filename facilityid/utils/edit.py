@@ -1,4 +1,5 @@
 import os
+import shelve
 
 from datetime import datetime
 
@@ -286,3 +287,16 @@ class Edit(Identifier):
         else:
             # TODO: Add logging that edits were not necessary
             pass
+
+    def equals_previous(self):
+        with shelve.open('previous_run', 'c') as db:
+            previous = db[self.feature_name]
+
+        if self == previous:
+            return True
+        else:
+            return False
+
+    def store_current(self):
+        with shelve.open('previous_run', 'c') as db:
+            db[self.feature_name] = self
