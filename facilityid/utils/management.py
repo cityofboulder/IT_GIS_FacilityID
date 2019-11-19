@@ -140,3 +140,11 @@ def add_layer_to_map(feature_class_name: str = None) -> None:
 def clear_layers_from_map():
     # TODO: Translate this function from Map to Pro
     pass
+
+
+def count(obj):
+    def wrapper(*args):
+        wrapper.records += 1
+        return obj(*args)
+    wrapper.records = 0
+    return wrapper

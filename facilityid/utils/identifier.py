@@ -3,8 +3,10 @@ import re
 
 from arcpy import ArcSDESQLExecute, Describe, ExecuteError, ListFields
 from arcpy.da import SearchCursor
+from .management import count
 
 
+@count
 class Identifier:
     """A class intended to deal with the specifics of controlling for
     the quality of Facility IDs. This class inherits the functionality

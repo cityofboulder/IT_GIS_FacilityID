@@ -7,6 +7,7 @@ from datetime import datetime
 from arcpy import ClearWorkspaceCache_management
 from arcpy.da import Editor, UpdateCursor
 from .identifier import Identifier
+from .management import count
 
 # Initialize the logger for this file
 log = config.logging.getLogger(__name__)
@@ -20,6 +21,7 @@ def _merge(x):
     return p + i
 
 
+@count
 class Edit(Identifier):
     """A class meant to be used once a table has been slated for edits.
 
