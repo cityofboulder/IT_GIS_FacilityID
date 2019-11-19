@@ -32,3 +32,48 @@ multiple:
   SDE.DEFAULT:
     include: []
     exclude: ["UTIL.SEWER", "UTIL.STORMWATER", "UTIL.WATERDISTRIBUTION"]
+
+# Logging Configurations
+LOGGING:
+  version: 1
+  formatters:
+    only:
+      format: '%(asctime)s.%(msecs)03d : %(name)s : %(levelname)s : %(message)s'
+      datefmt: '%m/%d/%Y %H:%M:%S'
+  handlers:
+    console:
+      class: logging.StreamHandler
+      level: DEBUG
+      formatter: only
+      stream: ext://sys.stdout
+    file:
+      class: logging.FileHandler
+      level: INFO
+      formatter: only
+      filename: '.\facilityid\log\facilityid.log'
+    email:
+      class: logging.handlers.SMTPHandler
+      mailhost: ["smtp.office365.com", 587]
+      fromaddr: "noreply@bouldercolorado.gov"
+      toaddrs: ["nestj1@bouldercolorado.gov"]
+      subject: "An error halted the FacilityID script"
+      credentials: ["noreply@bouldercolorado.gov", "password"]
+      secure: []
+      level: ERROR
+      formatter: only
+  loggers:
+    __main__:
+      level: INFO
+      handlers: [console, file, email]
+    app:
+      level: INFO
+      handlers: [console, file, email]
+    edit:
+      level: DEBUG
+      handlers: [console, file]
+    identifier:
+      level: DEBUG
+      handlers: [console, file]
+    management:
+      level: DEBUG
+      handlers: [console, file]

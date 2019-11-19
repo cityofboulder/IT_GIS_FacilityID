@@ -110,5 +110,6 @@ venv.bak/
 # mypy
 .mypy_cache/
 
-# logs
-log/
+# project specific
+facilityid/log/*
+facilityid/notebooks/

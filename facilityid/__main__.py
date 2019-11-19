@@ -1,19 +1,11 @@
-import getpass
-import logging
+import app
+import config
 
-from facilityid import app
-
-# Configure logging
-logging.basicConfig(filename='FacilityID.log',
-                    level=logging.INFO,
-                    format='%(asctime)s : %(levelname)s : %(message)s',
-                    datefmt='%d-%b-%y %H:%M:%S')
-
-# User who initiated the script
-username = getpass.getuser()
+# Initiate a logger for __main__
+log = config.logging.getLogger(__name__)
 
 if __name__ == "__main__":
     try:
         app.main()
     except Exception:
-        logging.critical("Something prevented the app from running")
+        log.exception("Something prevented the script from running")
