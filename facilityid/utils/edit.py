@@ -1,11 +1,15 @@
 import os
 import shelve
+import config
 
 from datetime import datetime
 
 from arcpy import ClearWorkspaceCache_management
 from arcpy.da import Editor, UpdateCursor
 from .identifier import Identifier
+
+# Initialize the logger for this file
+log = config.logging.getLogger(__name__)
 
 
 def _merge(x):
@@ -193,6 +197,7 @@ class Edit(Identifier):
 
         edited = list()
         if self.duplicates:
+            log.debug("Identifying duplicated Facility IDs...")
             # Identify rows that contain duplicate FACILITYIDs with the correct
             # prefix
             dup_rows = [row for row in self.rows if row['GLOBALID']
@@ -213,6 +218,7 @@ class Edit(Identifier):
                     edit_row["FACILITYID"]["str_id"] = str(new_id)
                     edited.append(edit_row)
 
+        log.debug("Inspecting all other rows in the table...")
         for edit_row in self.rows:
             if edit_row in edited:
                 continue
@@ -252,18 +258,22 @@ class Edit(Identifier):
                 version_name = f"{self.user}_FacilityID"
                 conn_file = os.path.join(os.getcwd, f"{version_name}.sde")
                 edit_conn = os.path.join(conn_file, *self.tuple_path[1:])
+                log.debug(f"Creating a db connection at {edit_conn}...")
                 # TODO: Add code to create a versioned database connection
                 try:
                     # Start an arc edit session
+                    log.debug("Entering an arc edit session...")
                     editor = Editor(conn_file)
                     editor.startEditing(False, True)
                     editor.startOperation()
 
+                    log.debug("Filtering the table to editted records only...")
                     # Query only the entries that need editing
                     guids = ", ".join(f"'{x}'" for x in guid_to_facid.keys())
                     query = f"GLOBALID IN ({guids})"
 
                     # Open an update cursor and perform edits
+                    log.debug("Opening an update cursor to perform edits...")
                     fields = ["GLOBALID", "FACILITYID"]
                     with UpdateCursor(edit_conn, fields, query) as cursor:
                         for row in cursor:
@@ -271,22 +281,21 @@ class Edit(Identifier):
                             cursor.updateRow(row)
 
                     # Stop the edit operation
+                    log.debug("Closing the edit session...")
                     editor.stopOperation()
                     editor.stopEditing(True)
                     del editor
                     ClearWorkspaceCache_management()
 
-                    # TODO: Add logging for successful versioned edit
+                    log.info("Successfully performed versioned edits...")
                 except RuntimeError:
-                    # TODO: Add logging for unsuccessful versioned edits
-                    pass
+                    log.exception("Could not perform versioned edits...")
             else:
-                # TODO: Add logging for versioned edits not being authorized
-                pass
+                log.error(("Versioned edits are not authorized by the "
+                           "data owner..."))
             # TODO: Join records to layer
         else:
-            # TODO: Add logging that edits were not necessary
-            pass
+            log.info("No edits were necessary...")
 
     def equals_previous(self):
         with shelve.open('previous_run', 'c') as db:
