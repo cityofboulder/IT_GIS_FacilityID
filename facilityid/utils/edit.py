@@ -237,9 +237,10 @@ class Edit(Identifier):
                 edits = True
 
             # ID EDITS
-            tests = [not str_id, len(str_id) != len(str(int_id)),
-                     int_id in self.used]
-            if any(tests):
+            # tests = [not str_id, len(str_id) != len(str(int_id)),
+            #          int_id in self.used]
+            # if any(tests):
+            if not str_id or int_id in self.used:
                 new_id = self._new_id()
                 edit_row["FACILITYID"]["int_id"] = new_id
                 edit_row["FACILITYID"]["str_id"] = str(new_id)
