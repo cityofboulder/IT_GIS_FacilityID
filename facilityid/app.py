@@ -1,7 +1,7 @@
 import config
 from utils.management import (delete_facilityid_versions,
                               clear_layers_from_map, find_in_sde,
-                              create_versioned_connection)
+                              versioned_connection, reconcile_post)
 from utils.identifier import Identifier
 from utils.edit import Edit
 
@@ -50,24 +50,26 @@ def main():
                 log.info("No records have been edited since the last run...")
                 continue
 
-            # Step 4d: Perform edits
+            # Step 4d: Create versioned connection, if applicable
             suffix = options["version_suffix"]
-            conn_file = create_versioned_connection(editor, parent, suffix)
+            version_name = f"{editor.user}{suffix}"
+            conn_file = versioned_connection(editor, parent, version_name)
 
+            # Step 4e: Perform edits
             log.info(f"Attempting versioned edits on {editor.feature_name} "
                      f"with prefix {editor.prefix} through a child version of "
                      f"{parent}...")
             editor.edit_version(conn_file)
 
-            # Step 4e: Shelve the edited object for future comparisons
+            # Step 4f: Shelve the edited object for future comparisons
             log.info("Storing table for future comparisons...")
             editor.store_current()
 
-            # Step 4f: Delete object instances from memory
+            # Step 4g: Delete object instances from memory
             del editor, facilityid
 
         # Step 5: Reconcile edits, and post depending on config
-        # TODO: Add a reconcile/post flow
+        reconcile_post(parent, version_name)
 
 
 main()

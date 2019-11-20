@@ -3,7 +3,8 @@ import config
 from arcpy.da import Walk
 from arcpy.mp import ArcGISProject
 from arcpy import (CreateVersion_management, DeleteVersion_management,
-                   ListVersions, CreateDatabaseConnection_management)
+                   ListVersions, CreateDatabaseConnection_management,
+                   ReconcileVersions_management)
 
 from .edit import Edit
 
@@ -64,8 +65,7 @@ def find_in_sde(sde_path: str, includes: list = [], excludes: list = []):
     return items
 
 
-def create_versioned_connection(edit_obj: Edit, parent: str,
-                                version_suffix: str):
+def versioned_connection(edit_obj: Edit, parent: str, version_name: str):
     """Create a version and associated versioned database connection.
 
     Parameters
@@ -74,9 +74,8 @@ def create_versioned_connection(edit_obj: Edit, parent: str,
         The Edit object of the feature class being analyzed
     parent : str
         The parent of the edit version to be created
-    version_suffix : str
-        The suffix that will be attached to the version, depending on the
-        parent.
+    version_name : str
+        The name of the version to be created
 
     Returns
     -------
@@ -90,7 +89,6 @@ def create_versioned_connection(edit_obj: Edit, parent: str,
                           edit_obj.isVersioned,
                           edit_obj.can_gisscr_edit(config.edit)]
     if all(version_essentials):
-        version_name = f"{edit_obj.user}{version_suffix}"
         conn_file = os.path.join(os.getcwd, f"{version_name}.sde")
         version_owner = "GISSCR"
         full_version_name = f"{version_owner}.{version_name}"
@@ -126,6 +124,22 @@ def create_versioned_connection(edit_obj: Edit, parent: str,
             log.error("The layer is not editable by the GISSCR user...")
 
         return ""
+
+
+def reconcile_post(parent: str, version: str):
+    reconcile_kwargs = {"input_database": config.edit,
+                        "reconcile_mode": "ALL_VERSIONS",
+                        "target_version": parent,
+                        "edit_versions": version,
+                        "abort_if_conflicts": True,
+                        "conflict_definition": "BY_OBJECT"}
+    if config.post_edits:
+        reconcile_kwargs = {**reconcile_kwargs,
+                            "acquire_locks": True,
+                            "with_post": True,
+                            "with_delete": True}
+
+    ReconcileVersions_management(**reconcile_kwargs)
 
 
 def delete_facilityid_versions(connection: str) -> None:
