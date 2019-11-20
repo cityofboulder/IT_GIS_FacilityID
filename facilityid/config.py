@@ -12,15 +12,22 @@ with open(r'.\facilityid\config.yaml') as config_file:
     config = yaml.safe_load(config_file)
     logging.config.dictConfig(config['LOGGING'])
 
+# Which database?
+db = config["platform"]
+database = config["DATABASES"][db]
+
+# Database connections
+read = database["connections"]["read"]
+edit = database["connections"]["edit"]
+
+# Database properties
+db_params = database["info"]
+
 # Versioning configurations
 post_edits = config["post_edits"]
 
 # Data owners that authorize versioned edits
 auth = [k for k, v in config["authorizes_edits"].items() if v]
-
-# Database connections
-read = config["connections"]["read"]
-edit = config["connections"]["edit"]
 
 # Filters for analysis
 single_parent = config["single_parent"]

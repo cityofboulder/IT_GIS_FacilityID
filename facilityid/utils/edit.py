@@ -250,22 +250,17 @@ class Edit(Identifier):
 
         return edited
 
-    def edit_version(self, edits_authorized: bool = False):
+    def edit_version(self, connection_file: str):
 
         records = self._edit()
         if records:
             guid_to_facid = {x['GLOBALID']: _merge(x) for x in records}
-
-            if edits_authorized:
-                version_name = f"{self.user}_FacilityID"
-                conn_file = os.path.join(os.getcwd, f"{version_name}.sde")
-                edit_conn = os.path.join(conn_file, *self.tuple_path[1:])
-                log.debug(f"Creating a db connection at {edit_conn}...")
-                # TODO: Add code to create a versioned database connection
+            if connection_file:
+                edit_conn = os.path.join(connection_file, *self.tuple_path[1:])
                 try:
                     # Start an arc edit session
                     log.debug("Entering an arc edit session...")
-                    editor = Editor(conn_file)
+                    editor = Editor(connection_file)
                     editor.startEditing(False, True)
                     editor.startOperation()
 
@@ -292,9 +287,6 @@ class Edit(Identifier):
                     log.info("Successfully performed versioned edits...")
                 except RuntimeError:
                     log.exception("Could not perform versioned edits...")
-            else:
-                log.error(("Versioned edits are not authorized by the "
-                           "data owner..."))
             # TODO: Join records to layer
         else:
             log.info("No edits were necessary...")

@@ -1,6 +1,7 @@
 import config
 from utils.management import (delete_facilityid_versions,
-                              clear_layers_from_map, find_in_sde)
+                              clear_layers_from_map, find_in_sde,
+                              create_versioned_connection)
 from utils.identifier import Identifier
 from utils.edit import Edit
 
@@ -20,11 +21,11 @@ def main():
     clear_layers_from_map()
 
     # Iterate through each configured versioned edit procedure
-    for parent, filters in config.procedure:
+    for parent, options in config.procedure:
         # Step 3: Obtain tuples of system paths for every fc
         log.info("Evaluating which SDE items to evaluate based on filters...")
-        features = find_in_sde(config.read, filters['include'],
-                               filters['exclude'])
+        features = find_in_sde(config.read, options['include'],
+                               options['exclude'])
 
         # Step 4: Iterate through each feature
         for feature in features:
@@ -38,8 +39,6 @@ def main():
                           facilityid.has_globalid,
                           facilityid.editorTrackingEnabled,
                           facilityid.prefix]
-            # non_essentials = [facilityid.isVersioned,
-            #                   facilityid.can_gisscr_edit(config.edit)]
             if not all(essentials):
                 log.error(("The layer does not qualify for analysis because "
                           "it is missing essential requirements..."))
@@ -52,11 +51,13 @@ def main():
                 continue
 
             # Step 4d: Perform edits
+            suffix = options["version_suffix"]
+            conn_file = create_versioned_connection(editor, parent, suffix)
+
             log.info(f"Attempting versioned edits on {editor.feature_name} "
                      f"with prefix {editor.prefix} through a child version of "
                      f"{parent}...")
-            authorized = editor.owner in config.auth
-            editor.edit_version(authorized)
+            editor.edit_version(conn_file)
 
             # Step 4e: Shelve the edited object for future comparisons
             log.info("Storing table for future comparisons...")

@@ -1,10 +1,8 @@
+# Database platform: ORACLE or SQLSERVER?
+platform: "ORACLE"
+
 # Post after making versioned edits?
 post_edits: False
-
-# SDE Connection file locations
-connections:
-  read: "S:\\GIS\\Share\\DatabaseConnections\\gis on gisprod2.sde"
-  edit: "S:\\PW\\PWShare\\GIS\\Scripts\\dbconnections\\gisscr on gisprod2.sde"
 
 # Users that authorize versioned edits
 authorizes_edits:
@@ -17,19 +15,24 @@ authorizes_edits:
 single_parent: True
 single:
   SDE.DEFAULT:
+    version_suffix: "_FacilityID"
     include: ["UTIL.", "TRANS.", "PW.", "PARKS."]
     exclude: []
 multiple: 
   WEBEDITOR.Esri_Anonymous_util/BHSewer:
+    version_suffix: "_BHSewerFacilityID"
     include: ["UTIL.SEWER"]
     exclude: []
   WEBEDITOR.Esri_Anonymous_util/BHStorm:
+    version_suffix: "_BHStormFacilityID"
     include: ["UTIL.STORMWATER"]
     exclude: []
   WEBEDITOR.Esri_Anonymous_util/BHWater:
+    version_suffix: "_BHWaterFacilityID"
     include: ["UTIL.WATERDISTRIBUTION"]
     exclude: []
   SDE.DEFAULT:
+    version_suffix: "_FacilityID"
     include: []
     exclude: ["UTIL.SEWER", "UTIL.STORMWATER", "UTIL.WATERDISTRIBUTION"]
 
@@ -77,3 +80,29 @@ LOGGING:
     management:
       level: DEBUG
       handlers: [console, file]
+
+# Database configurations
+DATABASES:
+  ORACLE:
+    connections:
+      read: "S:\\GIS\\Share\\DatabaseConnections\\gis on gisprod2.sde"
+      edit: "S:\\PW\\PWShare\\GIS\\Scripts\\dbconnections\\gisscr on gisprod2.sde"
+    info:
+      database_platform: "ORACLE"
+      instance: "gisprod2"
+      account_authentication: "DATABASE_AUTH"
+      username: "gisscr"
+      password: "gKJTZkCYS937"
+      version_type: "TRANSACTIONAL"
+  SQLSERVER:
+    connections:
+      read: "S:\\GIS\\Share\\DatabaseConnections\\SQLGISProd3\\gis on gisprod3.sde"
+      edit: "S:\\GIS\\Share\\DatabaseConnections\\SQLGISProd3\\gisscr on gisprod3.sde"
+    info:
+      database_platform: "SQL_SERVER"
+      instance: "sqlprod19gis"
+      database: "gisprod3"
+      account_authentication: "DATABASE_AUTH"
+      username: "gisscr"
+      password: ""
+      version_type: "TRANSACTIONAL"

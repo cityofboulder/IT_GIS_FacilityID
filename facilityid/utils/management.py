@@ -1,9 +1,14 @@
 import os
+import config
 from arcpy.da import Walk
 from arcpy.mp import ArcGISProject
 from arcpy import (CreateVersion_management, DeleteVersion_management,
                    ListVersions, CreateDatabaseConnection_management)
 
+from .edit import Edit
+
+# Initialize the logger for this file
+log = config.logging.getLogger(__name__)
 
 # Define globals specific to these functions
 aprx_location = "./EditFacilityID.aprx"
@@ -59,52 +64,71 @@ def find_in_sde(sde_path: str, includes: list = [], excludes: list = []):
     return items
 
 
-def create_versioned_connection(client: str, database: str,
-                                database_user: str, password: str,
-                                version_name: str, parent: str,
-                                source_connection: str):
+def create_versioned_connection(edit_obj: Edit, parent: str,
+                                version_suffix: str):
     """Create a version and associated versioned database connection.
 
     Parameters
     ----------
-    client : str
-        The database client being used (e.g. ORACLE or SQLSERVER)
-    database : str
-        The instance of the database to use
-    database_user : str
-        The connecting user to the database instance
-    password : str
-        The password for the database user
-    version_name : str
-        The name of the version
+    edit_obj : Edit
+        The Edit object of the feature class being analyzed
     parent : str
-        The parent of the version
-    source_connection : str
-        The connection file used to create the version
+        The parent of the edit version to be created
+    version_suffix : str
+        The suffix that will be attached to the version, depending on the
+        parent.
+
+    Returns
+    -------
+    str
+        A file path to the proper connection file, or an empty string if
+        versioned edits cannot be performed.
     """
 
-    # Create the version first
-    CreateVersion_management(in_workspace=source_connection,
-                             parent_version=parent,
-                             version_name=version_name,
-                             access_permission='PRIVATE')
+    authorized = edit_obj.owner in config.auth
+    version_essentials = [authorized,
+                          edit_obj.isVersioned,
+                          edit_obj.can_gisscr_edit(config.edit)]
+    if all(version_essentials):
+        version_name = f"{edit_obj.user}{version_suffix}"
+        conn_file = os.path.join(os.getcwd, f"{version_name}.sde")
+        version_owner = "GISSCR"
+        full_version_name = f"{version_owner}.{version_name}"
+        if os.path.exists(conn_file):
+            log.debug(f"{version_name} has already been created...")
+        else:
+            # Create the version
+            log.debug((f"Creating a version called {version_name} owned by "
+                       f"{version_owner}..."))
+            version = {"in_workspace": config.edit,
+                       "parent_version": parent,
+                       "version_name": version_name,
+                       "access_permission": "PRIVATE"}
+            CreateVersion_management(**version)
 
-    full_version_name = f"GISSCR.{version_name}"
-    connection_name = f"{version_name}.sde"
-    connection_file = os.path.join(os.getcwd(), connection_name)
-    if not os.path.exists(connection_file):
-        CreateDatabaseConnection_management(out_folder_path=os.getcwd(),
-                                            out_name=connection_name,
-                                            database_platform=client,  # 'ORACLE'
-                                            instance=database,  # 'gisprod2'
-                                            account_authentication='DATABASE_AUTH',
-                                            username=database_user,  # 'gisscr'
-                                            password=password,  # 'gKJTZkCYS937'
-                                            version_type='TRANSACTIONAL',
-                                            version=full_version_name)
+            # Create the database connection file
+            log.debug(f"Creating a versioned db connection at {conn_file}...")
+            connect = {"out_folder_path": os.getcwd(),
+                       "out_name": f"{version_name}.sde",
+                       "version": full_version_name,
+                       **config.db_params}
+            CreateDatabaseConnection_management(**connect)
+
+        return conn_file
+
+    else:
+        # Logging to understand why the layer cannot be edited in a version
+        if not version_essentials[0]:
+            log.error("Edits are not authorized by the data owner...")
+        if not version_essentials[1]:
+            log.error("The layer is not registered as versioned...")
+        if not version_essentials[2]:
+            log.error("The layer is not editable by the GISSCR user...")
+
+        return ""
 
 
-def delete_facilityid_versions(connection: str = None) -> None:
+def delete_facilityid_versions(connection: str) -> None:
     """Deletes versions created for editing Facility IDs
 
     Parameters
@@ -113,7 +137,8 @@ def delete_facilityid_versions(connection: str = None) -> None:
         location of the sde connection file
     """
 
-    del_versions = [v for v in ListVersions(connection) if "FacilityID" in v]
+    del_versions = [v for v in ListVersions(
+        connection) if "FACILITYID" in v.upper()]
     for d in del_versions:
         DeleteVersion_management(connection, d)
 
