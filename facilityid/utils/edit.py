@@ -2,7 +2,7 @@ import os
 import shelve
 import config
 
-from datetime import datetime
+from datetime import datetime, date
 
 from arcpy import ClearWorkspaceCache_management
 from arcpy.da import Editor, UpdateCursor
@@ -171,6 +171,16 @@ class Edit(Identifier):
 
         return (sort_1, sort_2, sort_3)
 
+    def _format_edit_row(self, row, old_facid):
+        result = {"DATE": str(date.today()),
+                  "TIME": datetime.now().strftime("%H:%M:%S"),
+                  "OWNER": self.owner,
+                  "FEATURE": self.name,
+                  "GLOBALID": row["GLOBALID"],
+                  "OLDFACILITYID": old_facid,
+                  "NEWFACILITYID": _merge(row)}
+        return result
+
     def _edit(self):
         """Iterates through a list of rows, editing incorrect or
         duplicated entries along the way.
@@ -218,7 +228,8 @@ class Edit(Identifier):
                     new_id = self._new_id()
                     edit_row["FACILITYID"]["int_id"] = new_id
                     edit_row["FACILITYID"]["str_id"] = str(new_id)
-                    edited.append(edit_row)
+                    r = self._format_edit_row(edit_row, i)
+                    edited.append(r)
 
         log.debug("Inspecting all other rows in the table...")
         for edit_row in self.rows:
@@ -227,6 +238,7 @@ class Edit(Identifier):
             # Flag whether edits need to be made to the row
             # Assume no edits to start
             edits = False
+            old_facid = _merge(edit_row)
             pfix = edit_row["FACILITYID"]["prefix"]
             str_id = edit_row["FACILITYID"]["str_id"]
             int_id = edit_row["FACILITYID"]["int_id"]
@@ -247,7 +259,8 @@ class Edit(Identifier):
                 edits = True
 
             if edits:
-                edited.append(edit_row)
+                r = self._format_edit_row(edit_row, old_facid)
+                edited.append(r)
 
         return edited
 
@@ -255,7 +268,7 @@ class Edit(Identifier):
 
         records = self._edit()
         if records:
-            guid_to_facid = {x['GLOBALID']: _merge(x) for x in records}
+            guid_facid = {x['GLOBALID']: x["NEWFACILITYID"] for x in records}
             if connection_file:
                 edit_conn = os.path.join(connection_file, *self.tuple_path[1:])
                 try:
@@ -267,7 +280,7 @@ class Edit(Identifier):
 
                     log.debug("Filtering the table to editted records only...")
                     # Query only the entries that need editing
-                    guids = ", ".join(f"'{x}'" for x in guid_to_facid.keys())
+                    guids = ", ".join(f"'{x}'" for x in guid_facid.keys())
                     query = f"GLOBALID IN ({guids})"
 
                     # Open an update cursor and perform edits
@@ -275,7 +288,7 @@ class Edit(Identifier):
                     fields = ["GLOBALID", "FACILITYID"]
                     with UpdateCursor(edit_conn, fields, query) as cursor:
                         for row in cursor:
-                            row[1] = guid_to_facid[row[0]]
+                            row[1] = guid_facid[row[0]]
                             cursor.updateRow(row)
 
                     # Stop the edit operation
