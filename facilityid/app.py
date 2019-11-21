@@ -56,9 +56,8 @@ def main():
             conn_file = versioned_connection(editor, parent, version_name)
 
             # Step 4e: Perform edits
-            log.info(f"Attempting versioned edits on {editor.feature_name} "
-                     f"with prefix {editor.prefix} through a child version of "
-                     f"{parent}...")
+            log.info((f"Attempting versioned edits on {editor.feature_name} "
+                     f"with prefix {editor.prefix}..."))
             editor.edit_version(conn_file)
 
             # Step 4f: Shelve the edited object for future comparisons
@@ -69,7 +68,12 @@ def main():
             del editor, facilityid
 
         # Step 5: Reconcile edits, and post depending on config
+        log.info(f"Reconciling {version_name} against {parent}...")
         reconcile_post(parent, version_name)
+
+    # Step 6: Summarize counts
+    log.info(f"The script inspected {Identifier.records} features "
+             f"and edited {Edit.records} of them...")
 
 
 main()
