@@ -1,11 +1,13 @@
 import os
-import config
+import csv
+
 from arcpy.da import Walk
 from arcpy.mp import ArcGISProject
 from arcpy import (CreateVersion_management, DeleteVersion_management,
                    ListVersions, CreateDatabaseConnection_management,
                    ReconcileVersions_management)
 
+from .. import config
 from .edit import Edit
 
 # Initialize the logger for this file
@@ -180,6 +182,27 @@ def clear_layers_from_map():
     # TODO: Translate this function from Map to Pro
     pass
 
+
+def write_to_csv(csv_file: str, rows: list):
+    """Write dict-like rows to a csv file. Append if the file exists,
+    create a new file if it does not already exist.
+
+    Parameters
+    ----------
+    csv_file : str
+        File path to the csv file
+    rows : list
+        Each item in the list is a dictionary representing a row
+    """
+    fields = list(rows[0].keys())
+    if not os.path.exists(csv_file):
+        with open(csv_file, 'w', newline='') as c:
+            writer = csv.DictWriter(c, fieldnames=fields)
+            writer.writeheader()
+    with open(csv_file, 'a', newline='') as c:
+        writer = csv.DictWriter(c, fieldnames=fields)
+        for row in rows:
+            writer.writerow(row)
 
 def count(obj):
     def wrapper(*args):

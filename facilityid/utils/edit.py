@@ -1,13 +1,13 @@
 import os
 import shelve
-import config
 
 from datetime import datetime, date
-
 from arcpy import ClearWorkspaceCache_management
 from arcpy.da import Editor, UpdateCursor
+
 from .identifier import Identifier
-from .management import count
+from .management import count, write_to_csv
+from .. import config
 
 # Initialize the logger for this file
 log = config.logging.getLogger(__name__)
@@ -301,6 +301,10 @@ class Edit(Identifier):
                     log.info("Successfully performed versioned edits...")
                 except RuntimeError:
                     log.exception("Could not perform versioned edits...")
+            log.debug("Saving edits to csv files...")
+            for f in ["AllEditsEver", f"{self.feature_name}_Edits"]:
+                csv_file = f'.\\facilityid\\log\\{f}.csv'
+                write_to_csv(csv_file, records)
             # TODO: Join records to layer
         else:
             log.info("No edits were necessary...")
