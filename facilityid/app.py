@@ -1,6 +1,6 @@
 import config
 from utils.management import (delete_facilityid_versions, clear_map_layers,
-                              find_in_sde, versioned_connection,
+                              find_in_sde, versioned_connection, remove_files,
                               reconcile_post, save_layer_files)
 from utils.identifier import Identifier
 from utils.edit import Edit
@@ -12,9 +12,10 @@ log = config.logging.getLogger(__name__)
 def main():
     log.info(f"Started by {config.username}...")
 
-    # Step 1: Delete all existing Facility ID versions
+    # Step 1: Delete all existing Facility ID versions and old files
     log.info("Deleting old Facility ID versions...")
     delete_facilityid_versions(config.edit)
+    remove_files(['.sde', '.lyrx', '.csv'], ['AllEditsEver'])
 
     # Step 2: Clear layers from all edit maps in Pro
     log.info("Removing layers from maps in the FacilityID Pro project...")
