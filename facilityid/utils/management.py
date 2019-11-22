@@ -7,9 +7,8 @@ from arcpy import (CreateVersion_management, DeleteVersion_management,
                    ListVersions, CreateDatabaseConnection_management,
                    ReconcileVersions_management, ExecuteError)
 
-
-from .. import config
-from ..app import post_success
+import facilityid.config as config
+from facilityid.app import post_success
 from .edit import Edit
 
 # Initialize the logger for this file

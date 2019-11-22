@@ -8,7 +8,7 @@ from arcpy.mp import ArcGISProject
 
 from .identifier import Identifier
 from .management import count, write_to_csv
-from .. import config
+import facilityid.config as config
 
 # Initialize the logger for this file
 log = config.logging.getLogger(__name__)
