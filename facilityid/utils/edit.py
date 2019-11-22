@@ -2,8 +2,9 @@ import os
 import shelve
 
 from datetime import datetime, date
-from arcpy import ClearWorkspaceCache_management
+from arcpy import (ClearWorkspaceCache_management, AddJoin_management)
 from arcpy.da import Editor, UpdateCursor
+from arcpy.mp import ArcGISProject
 
 from .identifier import Identifier
 from .management import count, write_to_csv
@@ -51,6 +52,7 @@ class Edit(Identifier):
         self.duplicates = self.duplicates()
         self.used = self._used()
         self.unused = self._unused()
+        self.aprx_connection = self.full_path
 
     def __hash__(self):
         return hash(self.__key())
@@ -264,6 +266,45 @@ class Edit(Identifier):
 
         return edited
 
+    def add_to_aprx(self, edit_rows):
+        """Adds the input layer to a .aprx Map based on the owner of the
+        data. For example, the UTIL.wFitting feature would be added to the
+        "UTIL" map of the designated .aprx file. The file path to the Pro
+        project is set in the config file.
+
+        Parameters:
+        -----------
+        edits_rows : list
+            A list of rows represented as dictionaries to be written to
+            the csv file
+        """
+
+        log.debug("Saving edits to csv files...")
+        for f in ["AllEditsEver", f"{self.feature_name}_Edits"]:
+            csv_file = f'.\\facilityid\\log\\{f}.csv'
+            write_to_csv(csv_file, edit_rows)
+
+        log.debug("Adding the layer to its edit aprx...")
+        aprx = ArcGISProject(config.aprx)
+        user_map = aprx.listMaps(f"{self.user}")[0]
+        user_map.addDataFromPath(self.aprx_connection)
+        layer = user_map.listLayers(self.feature_name)[0]
+        aprx.save()
+
+        # Move into the group layer, assuming one exists
+        try:
+            group_layer = [x for x in user_map.listLayers()
+                           if x.isGroupLayer][0]
+            user_map.addLayerToGroup(group_layer, layer)
+            user_map.removeLayer(layer)
+            layer = user_map.listLayers(self.feature_name)[0]
+        except IndexError:
+            log.exception(f"No group layer exists in the {self.owner} map...")
+
+        log.debug("Joining csv file to the layer in Pro...")
+        AddJoin_management(layer, "GLOBALID", csv_file, "GLOBALID")
+        aprx.save()
+
     def edit_version(self, connection_file: str):
 
         records = self._edit()
@@ -299,13 +340,11 @@ class Edit(Identifier):
                     ClearWorkspaceCache_management()
 
                     log.info("Successfully performed versioned edits...")
+                    # Reset the aprx connection to the versioned connection
+                    self.aprx_connection = edit_conn
                 except RuntimeError:
                     log.exception("Could not perform versioned edits...")
-            log.debug("Saving edits to csv files...")
-            for f in ["AllEditsEver", f"{self.feature_name}_Edits"]:
-                csv_file = f'.\\facilityid\\log\\{f}.csv'
-                write_to_csv(csv_file, records)
-            # TODO: Join records to layer
+            self.add_to_aprx(records)
         else:
             log.info("No edits were necessary...")
 
