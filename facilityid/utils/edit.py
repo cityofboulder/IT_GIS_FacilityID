@@ -46,6 +46,10 @@ class Edit(Identifier):
         A reverse sorted list of unused IDs between the min and max of
         used IDs
     """
+
+    edited_users = list()
+    edited_features = dict()
+
     def __init__(self, tuple_path):
         super().__init__(tuple_path)
         self.rows = self.rows()
@@ -63,6 +67,18 @@ class Edit(Identifier):
     def __key(self):
         key = sorted(self.rows, key=lambda x: x['GLOBALID'])
         return key
+
+    @classmethod
+    def _log_edits(cls, self, edit_rows):
+        """A class method for logging which layers and users needed edits.
+        """
+        cls.edited_features[self.feature_name] = len(edit_rows)
+        if self.user not in cls.edited_users:
+            cls.edited_users.append(self.user)
+
+    @classmethod
+    def _log_version(cls, self):
+        cls.edited_features[self.feature_name]["VERSIONED"] = True
 
     def _used(self):
         """Extracts a list of used ids in rows, sorted in reverse order.
@@ -303,10 +319,11 @@ class Edit(Identifier):
         AddJoin_management(layer, "GLOBALID", csv_file, "GLOBALID")
         aprx.save()
 
-    def edit_version(self, connection_file: str):
+    def edit_version(self, cls, connection_file: str):
 
         records = self._edit()
         if records:
+            cls._log_edits(records)
             guid_facid = {x['GLOBALID']: x["NEWFACILITYID"] for x in records}
             if connection_file:
                 edit_conn = os.path.join(connection_file, *self.tuple_path[1:])
@@ -340,15 +357,12 @@ class Edit(Identifier):
                     log.info("Successfully performed versioned edits...")
                     # Reset the aprx connection to the versioned connection
                     self.aprx_connection = edit_conn
+                    cls._log_version()
                 except RuntimeError:
                     log.exception("Could not perform versioned edits...")
             log.debug("Logging edits to csv...")
             write_to_csv(r'.\\facilityid\\log\\AllEditsEver.csv', records)
-            if not config.post_edits:
-                self.add_to_aprx(records)
-            else:
-                log.debug(("Automatic post has been enabled, skipping layer "
-                           "file creation..."))
+            self.add_to_aprx(records)
         else:
             log.info("No edits were necessary...")
 
