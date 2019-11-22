@@ -76,12 +76,13 @@ def main():
 
     # Step 6: Save layer files
     log.info("Saving layer files...")
-    save_layer_files()
+    if not config.post_edits:
+        save_layer_files()
 
     # Step 7: Send an email with results
     esri = r".\\.esri"
     layer_files = [os.path.join(os.getcwd(), f)
-                   for f in os.listdir(esri) if f.endswith('.sde')]
+                   for f in os.listdir(esri) if f.endswith('.lyrx')]
     send_email(r".\\facilityid\\log\\facilityid.log",
                r".\\facilityid\\log\\AllEditsEver.csv",
                *layer_files)

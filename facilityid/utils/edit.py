@@ -279,10 +279,8 @@ class Edit(Identifier):
             the csv file
         """
 
-        log.debug("Saving edits to csv files...")
-        for f in ["AllEditsEver", f"{self.feature_name}_Edits"]:
-            csv_file = f'.\\facilityid\\log\\{f}.csv'
-            write_to_csv(csv_file, edit_rows)
+        csv_file = f'.\\facilityid\\log\\{self.feature_name}_Edits.csv'
+        write_to_csv(csv_file, edit_rows)
 
         log.debug("Adding the layer to its edit aprx...")
         aprx = ArcGISProject(config.aprx)
@@ -344,7 +342,13 @@ class Edit(Identifier):
                     self.aprx_connection = edit_conn
                 except RuntimeError:
                     log.exception("Could not perform versioned edits...")
-            self.add_to_aprx(records)
+            log.debug("Logging edits to csv...")
+            write_to_csv(r'.\\facilityid\\log\\AllEditsEver.csv', records)
+            if not config.post_edits:
+                self.add_to_aprx(records)
+            else:
+                log.debug(("Automatic post has been enabled, skipping layer "
+                           "file creation..."))
         else:
             log.info("No edits were necessary...")
 
