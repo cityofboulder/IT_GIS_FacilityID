@@ -83,9 +83,11 @@ def main():
     esri = r".\\.esri"
     layer_files = [os.path.join(esri, f)
                    for f in os.listdir(esri) if f.endswith('.lyrx')]
-    send_email(r".\\facilityid\\log\\facilityid.log",
-               r".\\facilityid\\log\\AllEditsEver.csv",
-               *layer_files)
+    for user, stewards in config.recipients:
+        send_email(stewards,
+                   r".\\facilityid\\log\\facilityid.log",
+                   r".\\facilityid\\log\\AllEditsEver.csv",
+                   *[x for x in layer_files if user in x])
 
 
 main()
