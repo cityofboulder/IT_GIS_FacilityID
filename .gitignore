@@ -111,5 +111,6 @@ venv.bak/
 .mypy_cache/
 
 # project specific
+.esri/*
 facilityid/log/*
 facilityid/notebooks/
