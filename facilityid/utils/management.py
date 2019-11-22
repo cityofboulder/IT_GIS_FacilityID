@@ -5,7 +5,7 @@ from arcpy.da import Walk
 from arcpy.mp import ArcGISProject
 from arcpy import (CreateVersion_management, DeleteVersion_management,
                    ListVersions, CreateDatabaseConnection_management,
-                   ReconcileVersions_management)
+                   ReconcileVersions_management, ExecuteError)
 
 
 from .. import config
@@ -127,7 +127,23 @@ def versioned_connection(edit_obj: Edit, parent: str, version_name: str):
         return ""
 
 
-def reconcile_post(parent: str, version: str):
+def reconcile_post(parent: str, version: str) -> dict:
+    """Reconciles a version. Posts the result to parent if configured.
+
+    Parameters
+    ----------
+    parent : str
+        The name of the parent version
+    version : str
+        The name of the version to be reconciled
+
+    Returns
+    -------
+    dict
+        A dictionary of parent : success/failure of version post
+    """
+
+    rec_post_log = dict()
     reconcile_kwargs = {"input_database": config.edit,
                         "reconcile_mode": "ALL_VERSIONS",
                         "target_version": parent,
@@ -138,9 +154,20 @@ def reconcile_post(parent: str, version: str):
         reconcile_kwargs = {**reconcile_kwargs,
                             "acquire_locks": True,
                             "with_post": True,
-                            "with_delete": True}
+                            "with_delete": False}
 
-    ReconcileVersions_management(**reconcile_kwargs)
+    try:
+        log.info(f"Reconciling {version} against {parent}...")
+        ReconcileVersions_management(**reconcile_kwargs)
+        if config.post_edits:
+            rec_post_log[parent] = True
+        else:
+            rec_post_log[parent] = False
+    except ExecuteError:
+        log.exception("Could not reconcile and post...")
+        rec_post_log[parent] = False
+
+    return rec_post_log
 
 
 def delete_facilityid_versions(connection: str) -> None:
