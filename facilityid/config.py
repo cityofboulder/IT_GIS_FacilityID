@@ -36,3 +36,5 @@ if single_parent:
     procedure = config["single"]
 else:
     procedure = config["multiple"]
+
+recipients = config['recipients']

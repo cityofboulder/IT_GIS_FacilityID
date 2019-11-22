@@ -39,6 +39,20 @@ multiple:
     include: []
     exclude: ["UTIL.SEWER", "UTIL.STORMWATER", "UTIL.WATERDISTRIBUTION"]
 
+# Email recipients for each database user
+recipients:
+  UTIL: - "nestlerj@bouldercolorado.gov"
+        - "jefferyb@bouldercolorado.gov"
+        - "salmone@bouldercolorado.gov"
+  TRANS: - "simpsonj@bouldercolorado.gov"
+         - "gregoryk@bouldercolorado.gov"
+  PW: - "nestlerj@bouldercolorado.gov"
+      - "jefferyb@bouldercolorado.gov"
+      - "salmone@bouldercolorado.gov"
+      - "simpsonj@bouldercolorado.gov"
+      - "gregoryk@bouldercolorado.gov"
+  PARKS: - "spielmanc@bouldercolorado.gov"
+
 # Logging Configurations
 LOGGING:
   version: 1
