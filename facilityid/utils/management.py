@@ -10,6 +10,7 @@ from arcpy import (CreateVersion_management, DeleteVersion_management,
 
 from .. import config
 from .edit import Edit
+from .email_body import body
 
 # Initialize the logger for this file
 log = config.logging.getLogger(__name__)
@@ -234,7 +235,7 @@ def remove_files(include: list, exclude: list = []):
             os.remove(d)
 
 
-def send_email(*attachments):
+def send_email(recipients: list, *attachments):
     import smtplib
     from email.MIMEMultipart import MIMEMultipart
     from email.MIMEText import MIMEText
@@ -243,12 +244,6 @@ def send_email(*attachments):
     # from/to addresses
     sender = 'noreply@bouldercolorado.gov'
     password = "password"
-    recipients = ["nestlerj@bouldercolorado.gov",
-                  "jeffreyb@bouldercolorado.gov",
-                  "salmone@bouldercolorado.gov",
-                  "gregoryk@bouldercolorado.gov",
-                  "simpsonj@bouldercolorado.gov",
-                  "spielmanc@bouldercolorado.gov"]
 
     # message
     msg = MIMEMultipart('alternative')
@@ -257,53 +252,7 @@ def send_email(*attachments):
     msg['Subject'] = "Facility ID"
 
     # body
-    if config.post_edits:
-        body = f"""\
-                <html>
-                    <head></head>
-                    <body>
-                        <p>
-                        Dear Human,<br><br>
-                        Versioned edits to Facility IDs have been posted on
-                         your behalf by the GISSCR user.<br><br>
-                        If you have not authorized edits, registered your
-                         data as versioned, or granted GISSCR edit access to
-                         your data, a layer file with a table of joined edits
-                         has been attached to this email for your inspection.
-                        </p>
-                        <p>
-                        Beep Boop Beep,<br><br>
-                        End Transmision
-                        </p>
-                    </body>
-                </html>
-                """
-    else:
-        body = f"""\
-                <html>
-                    <head></head>
-                    <body>
-                        <p>
-                        Dear Human,<br><br>
-                        Versioned edits to Facility IDs have been performed on
-                         your behalf by the GISSCR user.<br><br>
-                        Please navigate to your department's attached layer
-                         file to inspect the versioned edits and post all
-                         changes.<br><br>
-                        If you have not authorized edits, registered your
-                         data as versioned, or granted GISSCR edit access to
-                         your data, your department's layer file contains read-
-                         only layers joined to a table of edits, which you can
-                         manually change sources for each layer and perform the
-                         edits yourself.
-                        </p>
-                        <p>
-                        Beep Boop Beep,<br><br>
-                        End Transmision
-                        </p>
-                    </body>
-                </html>
-                """
+    email_body = body
     if attachments:
         for item in attachments:
             a = open(item, 'rb')
@@ -314,7 +263,7 @@ def send_email(*attachments):
                             filename=item.split(os.sep).pop())
             msg.attach(part)
 
-    msg.attach(MIMEText(body, 'html'))
+    msg.attach(MIMEText(email_body, 'html'))
 
     # create SMTP object
     server = smtplib.SMTP(host='smtp.office365.com', port=587)
