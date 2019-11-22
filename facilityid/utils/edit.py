@@ -7,7 +7,7 @@ from arcpy.da import Editor, UpdateCursor
 from arcpy.mp import ArcGISProject
 
 from .identifier import Identifier
-from .management import count, write_to_csv
+from .management import write_to_csv
 import facilityid.config as config
 
 # Initialize the logger for this file
@@ -22,7 +22,6 @@ def _merge(x):
     return p + i
 
 
-@count
 class Edit(Identifier):
     """A class meant to be used once a table has been slated for edits.
 
