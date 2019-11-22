@@ -1,7 +1,7 @@
 import config
-from utils.management import (delete_facilityid_versions,
-                              clear_layers_from_map, find_in_sde,
-                              versioned_connection, reconcile_post)
+from utils.management import (delete_facilityid_versions, clear_map_layers,
+                              find_in_sde, versioned_connection,
+                              reconcile_post, save_layer_files)
 from utils.identifier import Identifier
 from utils.edit import Edit
 
@@ -18,7 +18,7 @@ def main():
 
     # Step 2: Clear layers from all edit maps in Pro
     log.info("Removing layers from maps in the FacilityID Pro project...")
-    clear_layers_from_map()
+    clear_map_layers()
 
     # Iterate through each configured versioned edit procedure
     for parent, options in config.procedure:
@@ -71,9 +71,12 @@ def main():
         log.info(f"Reconciling {version_name} against {parent}...")
         reconcile_post(parent, version_name)
 
-    # Step 6: Summarize counts
-    log.info(f"The script inspected {Identifier.records} features "
-             f"and edited {Edit.records} of them...")
+    # Step 6: Save layer files
+    log.info("Saving layer files...")
+    save_layer_files()
+
+    # Step 7: Send an email with results
+    # TODO: Add an email function!
 
 
 main()

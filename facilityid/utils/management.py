@@ -13,9 +13,6 @@ from .edit import Edit
 # Initialize the logger for this file
 log = config.logging.getLogger(__name__)
 
-# Define globals specific to these functions
-aprx_location = "./EditFacilityID.aprx"
-
 
 def find_in_sde(sde_path: str, includes: list = [], excludes: list = []):
     """Finds all possible feature classes within the sde connection
@@ -159,28 +156,35 @@ def delete_facilityid_versions(connection: str) -> None:
         DeleteVersion_management(connection, d)
 
 
-# TODO: verify that add_layer_to_map works
-def add_layer_to_map(feature_class_name: str = None) -> None:
-    """ Adds the input layer to a .aprx Map based on the owner of the
-    data.  For example, the UTIL.wFitting feature would be added to the
-    "UTIL" map of the designated .aprx file
-
-    Parameters
-    ----------
-    feature_class_name : str
-        The full name of the feature class inside sde (e.g. UTIL.wFitting)
+def clear_map_layers():
+    """Removes layers from maps within the ArcGIS Pro project template.
+    Does not remove the layers if they are group layers or basemaps.
     """
+    aprx = ArcGISProject(config.aprx)
+    for map_ in aprx.listMaps():
+        del_layers = [x for x in map_.listLayers(
+        ) if not x.isGroupLayer and not x.isBasemapLayer]
+        if del_layers:
+            for d in del_layers:
+                map_.removeLayer(d)
 
-    user, fc = feature_class_name.split(".")
-    aprx = ArcGISProject(aprx_location)
-    user_map = aprx.listMaps(f"{user}")[0]
-    user_map.addDataFromPath()  # TODO: add data from the gisscr user
-    aprx.save()
 
-
-def clear_layers_from_map():
-    # TODO: Translate this function from Map to Pro
-    pass
+def save_layer_files():
+    """Saves layers in every map to a layer file based on user. If a
+    group layer does not exist, it will save an individual layer file
+    for every layer that needs edits. Saved in the .esri folder of the
+    project.
+    """
+    aprx = ArcGISProject(config.aprx)
+    for map_ in aprx.listMaps():
+        try:
+            layer = [x for x in map_.listLayers() if x.isGroupLayer][0]
+            layer.saveACopy(f".\\.esri\\{map_.name}_FeaturesToEdit.lyrx")
+        except IndexError:
+            log.exception(f"No group layers exist in the {map_.name} map...")
+            layers = [x for x in map_.listLayers() if not x.isBasemapLayer]
+            for l in layers:
+                l.saveACopy(f".\\.esri\\{l.name}.lyrx")
 
 
 def write_to_csv(csv_file: str, rows: list):
@@ -203,6 +207,7 @@ def write_to_csv(csv_file: str, rows: list):
         writer = csv.DictWriter(c, fieldnames=fields)
         for row in rows:
             writer.writerow(row)
+
 
 def count(obj):
     def wrapper(*args):
