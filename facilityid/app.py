@@ -1,7 +1,5 @@
 import os
 
-from arcpy import ExecuteError
-
 import config
 from utils.management import (delete_facilityid_versions, clear_map_layers,
                               find_in_sde, versioned_connection, remove_files,
@@ -26,6 +24,7 @@ def main():
     clear_map_layers()
 
     # Iterate through each configured versioned edit procedure
+    post_success = list()
     for parent, options in config.procedure:
         # Step 3: Obtain tuples of system paths for every fc
         log.info("Evaluating which SDE items to evaluate based on filters...")
@@ -73,17 +72,13 @@ def main():
             del editor, facilityid
 
         # Step 5: Reconcile edit version (and post, depending on config)
-        try:
-            log.info(f"Reconciling {version_name} against {parent}...")
-            reconcile_post(parent, version_name)
-            post_success = True
-        except ExecuteError:
-            log.exception("Could not reconcile and post...")
-            post_success = False
+        if conn_file:
+            post_status = reconcile_post(parent, version_name)
+            post_success = {**post_success, **post_status}
 
     # Step 6: Save layer files if posts were not authorized or completed
     log.info("Saving layer files...")
-    if not config.post_edits or not post_success:
+    if not config.post_edits or any(not x for x in post_success.values()):
         save_layer_files()
 
     # Step 7: Send an email with results
