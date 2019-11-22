@@ -8,8 +8,6 @@ from arcpy import (CreateVersion_management, DeleteVersion_management,
                    ReconcileVersions_management, ExecuteError)
 
 import facilityid.config as config
-from facilityid.app import post_success
-from .edit import Edit
 
 # Initialize the logger for this file
 log = config.logging.getLogger(__name__)
@@ -65,12 +63,12 @@ def find_in_sde(sde_path: str, includes: list = [], excludes: list = []):
     return items
 
 
-def versioned_connection(edit_obj: Edit, parent: str, version_name: str):
+def versioned_connection(edit_obj, parent: str, version_name: str):
     """Create a version and associated versioned database connection.
 
     Parameters
     ----------
-    edit_obj : Edit
+    edit_obj : Edit object
         The Edit object of the feature class being analyzed
     parent : str
         The parent of the edit version to be created
@@ -261,13 +259,18 @@ def remove_files(include: list, exclude: list = []):
             os.remove(d)
 
 
-def _email_body(user: str) -> str:
+def _email_body(user: str, edited_users: list, success: dict) -> str:
     """Defines the main body of the email sent at the end of the script.
 
     Parameters:
     -----------
     user : str
         The user email being sent
+    edited_users : list
+        All users that have edited layers
+    success : dict
+        Boolean values for each parent version describing whether
+        versions have been successfully posted.
 
     Returns:
     --------
@@ -275,9 +278,9 @@ def _email_body(user: str) -> str:
         A str with HTML tags that makes up the main body of the email
     """
 
-    if user in Edit.edited_users:
+    if user in edited_users:
         if config.post_edits:
-            if all(post_success.values()):
+            if all(success.values()):
                 insert = ("Versioned edits to Facility IDs have been posted "
                           "on your behalf by the GISSCR user.")
             else:
@@ -322,7 +325,8 @@ def _email_body(user: str) -> str:
     return body
 
 
-def send_email(user: str, recipients: list, *attachments):
+def send_email(user: str, edited_users: list, success: dict, recipients: list,
+               *attachments):
     import smtplib
     from email.MIMEMultipart import MIMEMultipart
     from email.MIMEText import MIMEText
@@ -339,7 +343,7 @@ def send_email(user: str, recipients: list, *attachments):
     msg['Subject'] = "Facility ID"
 
     # body
-    body = _email_body(user)
+    body = _email_body(user, edited_users, success)
     if attachments:
         for item in attachments:
             a = open(item, 'rb')
@@ -364,11 +368,3 @@ def send_email(user: str, recipients: list, *attachments):
     # send email
     server.sendmail(sender, recipients, msg.as_string())
     server.quit()
-
-
-def count(obj):
-    def wrapper(*args):
-        wrapper.records += 1
-        return obj(*args)
-    wrapper.records = 0
-    return wrapper
