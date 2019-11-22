@@ -1,14 +1,14 @@
 import os
 import shelve
+from datetime import date, datetime
 
-from datetime import datetime, date
-from arcpy import (ClearWorkspaceCache_management, AddJoin_management)
+import facilityid.config as config
+from arcpy import AddJoin_management, ClearWorkspaceCache_management
 from arcpy.da import Editor, UpdateCursor
 from arcpy.mp import ArcGISProject
 
 from .identifier import Identifier
 from .management import write_to_csv
-import facilityid.config as config
 
 # Initialize the logger for this file
 log = config.logging.getLogger(__name__)

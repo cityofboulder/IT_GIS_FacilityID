@@ -1,11 +1,9 @@
 import os
 
-import config
-from utils.management import (delete_facilityid_versions, clear_map_layers,
-                              find_in_sde, versioned_connection, remove_files,
-                              reconcile_post, save_layer_files, send_email)
-from utils.identifier import Identifier
-from utils.edit import Edit
+import facilityid.config as config
+import facilityid.utils.edit as edit
+import facilityid.utils.identifier as identify
+import facilityid.utils.management as mgmt
 
 # Initialize the logger for this file
 log = config.logging.getLogger(__name__)
@@ -16,25 +14,25 @@ def main():
 
     # Step 1: Delete all existing Facility ID versions and old files
     log.info("Deleting old Facility ID versions...")
-    delete_facilityid_versions(config.edit)
-    remove_files(['.sde', '.lyrx', '.csv'], ['AllEditsEver'])
+    mgmt.delete_facilityid_versions(config.edit)
+    mgmt.remove_files(['.sde', '.lyrx', '.csv'], ['AllEditsEver'])
 
     # Step 2: Clear layers from all edit maps in Pro
     log.info("Removing layers from maps in the FacilityID Pro project...")
-    clear_map_layers()
+    mgmt.clear_map_layers()
 
     # Iterate through each configured versioned edit procedure
     post_success = list()
     for parent, options in config.procedure:
         # Step 3: Obtain tuples of system paths for every fc
         log.info("Evaluating which SDE items to evaluate based on filters...")
-        features = find_in_sde(config.read, options['include'],
-                               options['exclude'])
+        features = mgmt.find_in_sde(config.read, options['include'],
+                                    options['exclude'])
 
         # Step 4: Iterate through each feature
         for feature in features:
             # Step 4a: Initialize an identifier object
-            facilityid = Identifier(feature)
+            facilityid = identify.Identifier(feature)
             log.info(f"Analyzing {facilityid.feature_name}...")
 
             # Step 4b: Make preliminary checks before analyzing the feature
@@ -49,7 +47,7 @@ def main():
                 continue
 
             # Step 4c: Compare Edit object to previous script run
-            editor = Edit(feature)
+            editor = edit.Edit(feature)
             if editor.equals_previous():
                 log.info("No records have been edited since the last run...")
                 continue
@@ -57,7 +55,7 @@ def main():
             # Step 4d: Create versioned connection, if applicable
             suffix = options["version_suffix"]
             version_name = f"{editor.user}{suffix}"
-            conn_file = versioned_connection(editor, parent, version_name)
+            conn_file = mgmt.versioned_connection(editor, parent, version_name)
 
             # Step 4e: Perform edits
             log.info((f"Attempting versioned edits on {editor.feature_name} "
@@ -73,22 +71,23 @@ def main():
 
         # Step 5: Reconcile edit version (and post, depending on config)
         if conn_file:
-            post_status = reconcile_post(parent, version_name)
+            post_status = mgmt.reconcile_post(parent, version_name)
             post_success = {**post_success, **post_status}
 
     # Step 6: Save layer files if posts were not authorized or completed
     log.info("Saving layer files...")
     if not config.post_edits or any(not x for x in post_success.values()):
-        save_layer_files()
+        mgmt.save_layer_files()
 
     # Step 7: Send an email with results
     esri = r".\\.esri"
     layer_files = [os.path.join(esri, f)
                    for f in os.listdir(esri) if f.endswith('.lyrx')]
     for user, stewards in config.recipients:
-        send_email(user, stewards, r".\\facilityid\\log\\facilityid.log",
-                   r".\\facilityid\\log\\AllEditsEver.csv",
-                   *[x for x in layer_files if user in x])
+        mgmt.send_email(user, edit.Edit.edited_users, post_success, stewards,
+                        r".\\facilityid\\log\\facilityid.log",
+                        r".\\facilityid\\log\\AllEditsEver.csv",
+                        *[x for x in layer_files if user in x])
 
 
 main()

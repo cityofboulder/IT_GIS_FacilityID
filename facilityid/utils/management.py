@@ -1,13 +1,12 @@
-import os
 import csv
-
-from arcpy.da import Walk
-from arcpy.mp import ArcGISProject
-from arcpy import (CreateVersion_management, DeleteVersion_management,
-                   ListVersions, CreateDatabaseConnection_management,
-                   ReconcileVersions_management, ExecuteError)
+import os
 
 import facilityid.config as config
+from arcpy import (CreateDatabaseConnection_management,
+                   CreateVersion_management, DeleteVersion_management,
+                   ExecuteError, ListVersions, ReconcileVersions_management)
+from arcpy.da import Walk
+from arcpy.mp import ArcGISProject
 
 # Initialize the logger for this file
 log = config.logging.getLogger(__name__)

@@ -1,7 +1,6 @@
-import app
-import config
-
-from utils.management import remove_files
+import facilityid.app as app
+import facilityid.config as config
+from facilityid.utils.management import remove_files
 
 # Initiate a logger for __main__
 log = config.logging.getLogger(__name__)
