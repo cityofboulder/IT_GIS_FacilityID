@@ -1,5 +1,5 @@
 #ArcGIS Pro project location
-aprx: ".\.editmap\EditMaps.aprx"
+aprx: ".\\.editmap\\EditMaps.aprx"
 
 # Database platform: ORACLE or SQLSERVER?
 platform: "ORACLE"
@@ -41,17 +41,21 @@ multiple:
 
 # Email recipients for each database user
 recipients:
-  UTIL: - "nestlerj@bouldercolorado.gov"
-        - "jefferyb@bouldercolorado.gov"
-        - "salmone@bouldercolorado.gov"
-  TRANS: - "simpsonj@bouldercolorado.gov"
-         - "gregoryk@bouldercolorado.gov"
-  PW: - "nestlerj@bouldercolorado.gov"
-      - "jefferyb@bouldercolorado.gov"
-      - "salmone@bouldercolorado.gov"
-      - "simpsonj@bouldercolorado.gov"
-      - "gregoryk@bouldercolorado.gov"
-  PARKS: - "spielmanc@bouldercolorado.gov"
+  UTIL: 
+    - "nestlerj@bouldercolorado.gov"
+    - "jefferyb@bouldercolorado.gov"
+    - "salmone@bouldercolorado.gov"
+  TRANS: 
+    - "simpsonj@bouldercolorado.gov"
+    - "gregoryk@bouldercolorado.gov"
+  PW: 
+    - "nestlerj@bouldercolorado.gov"
+    - "jefferyb@bouldercolorado.gov"
+    - "salmone@bouldercolorado.gov"
+    - "simpsonj@bouldercolorado.gov"
+    - "gregoryk@bouldercolorado.gov"
+  PARKS: 
+    - "spielmanc@bouldercolorado.gov"
 
 # Logging Configurations
 LOGGING:
@@ -75,7 +79,8 @@ LOGGING:
       class: logging.handlers.SMTPHandler
       mailhost: ["smtp.office365.com", 587]
       fromaddr: "noreply@bouldercolorado.gov"
-      toaddrs: ["nestj1@bouldercolorado.gov"]
+      toaddrs: 
+        - "nestj1@bouldercolorado.gov"
       subject: "An error halted the FacilityID script"
       credentials: ["noreply@bouldercolorado.gov", "password"]
       secure: []

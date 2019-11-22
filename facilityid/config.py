@@ -1,15 +1,15 @@
-import yaml
-import logging
 import getpass
-
+import logging
 import logging.config
 import logging.handlers
+
+import yaml
 
 username = getpass.getuser()
 user_email = f"{username}@bouldercolorado.gov"
 
 with open(r'.\facilityid\config.yaml') as config_file:
-    config = yaml.safe_load(config_file)
+    config = yaml.safe_load(config_file.read())
     logging.config.dictConfig(config['LOGGING'])
 
 # Which database?
