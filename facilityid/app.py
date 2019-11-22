@@ -1,5 +1,7 @@
 import os
 
+from arcpy import ExecuteError
+
 import config
 from utils.management import (delete_facilityid_versions, clear_map_layers,
                               find_in_sde, versioned_connection, remove_files,
@@ -70,13 +72,18 @@ def main():
             # Step 4g: Delete object instances from memory
             del editor, facilityid
 
-        # Step 5: Reconcile edits, and post depending on config
-        log.info(f"Reconciling {version_name} against {parent}...")
-        reconcile_post(parent, version_name)
+        # Step 5: Reconcile edit version (and post, depending on config)
+        try:
+            log.info(f"Reconciling {version_name} against {parent}...")
+            reconcile_post(parent, version_name)
+            post_success = True
+        except ExecuteError:
+            log.exception("Could not reconcile and post...")
+            post_success = False
 
-    # Step 6: Save layer files
+    # Step 6: Save layer files if posts were not authorized or completed
     log.info("Saving layer files...")
-    if not config.post_edits:
+    if not config.post_edits or not post_success:
         save_layer_files()
 
     # Step 7: Send an email with results
