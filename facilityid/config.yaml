@@ -1,3 +1,6 @@
+#ArcGIS Pro project location
+aprx: ".\.editmap\EditMaps.aprx"
+
 # Database platform: ORACLE or SQLSERVER?
 platform: "ORACLE"
 
