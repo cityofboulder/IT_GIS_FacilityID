@@ -9,8 +9,8 @@ from arcpy import (CreateVersion_management, DeleteVersion_management,
 
 
 from .. import config
+from ..app import post_success
 from .edit import Edit
-from .email_body import body
 
 # Initialize the logger for this file
 log = config.logging.getLogger(__name__)
@@ -262,7 +262,68 @@ def remove_files(include: list, exclude: list = []):
             os.remove(d)
 
 
-def send_email(recipients: list, *attachments):
+def _email_body(user: str) -> str:
+    """Defines the main body of the email sent at the end of the script.
+
+    Parameters:
+    -----------
+    user : str
+        The user email being sent
+
+    Returns:
+    --------
+    str
+        A str with HTML tags that makes up the main body of the email
+    """
+
+    if user in Edit.edited_users:
+        if config.post_edits:
+            if all(post_success.values()):
+                insert = ("Versioned edits to Facility IDs have been posted "
+                          "on your behalf by the GISSCR user.")
+            else:
+                insert = ("The GISSCR user attempted to post Facility ID "
+                          "edits on your behalf, but encountered "
+                          "errors while posting one or more of the child "
+                          "versions .<br><br>"
+                          "A layer file with versioned connections to your "
+                          "data has been attached to this email for you to "
+                          "post manually.")
+        else:
+            insert = (" Versioned edits to Facility IDs have been performed "
+                      "on your behalf by the GISSCR user.<br><br>"
+                      "Please navigate to your department's attached layer "
+                      "file to inspect the versioned edits and post all "
+                      "changes.<br><br>"
+                      "If you have not authorized edits, registered your data "
+                      "as versioned, or granted GISSCR edit access to your "
+                      "data, your department's layer file contains read-only "
+                      "layers joined to a table of edits. You can manually "
+                      "change sources for each layer and perform the edits "
+                      "yourself.")
+    else:
+        insert = (f"None of the features owned by {user} required Facility ID "
+                  "edits. Congratulations!")
+
+    body = f"""\
+                <html>
+                    <head></head>
+                    <body>
+                        <p>
+                        Dear Human,<br><br>
+                        {insert}
+                        </p>
+                        <p>
+                        Beep Boop Beep,<br><br>
+                        End Transmission
+                        </p>
+                    </body>
+                </html>
+                """
+    return body
+
+
+def send_email(user: str, recipients: list, *attachments):
     import smtplib
     from email.MIMEMultipart import MIMEMultipart
     from email.MIMEText import MIMEText
@@ -279,7 +340,7 @@ def send_email(recipients: list, *attachments):
     msg['Subject'] = "Facility ID"
 
     # body
-    email_body = body
+    body = _email_body(user)
     if attachments:
         for item in attachments:
             a = open(item, 'rb')
@@ -290,7 +351,7 @@ def send_email(recipients: list, *attachments):
                             filename=item.split(os.sep).pop())
             msg.attach(part)
 
-    msg.attach(MIMEText(email_body, 'html'))
+    msg.attach(MIMEText(body, 'html'))
 
     # create SMTP object
     server = smtplib.SMTP(host='smtp.office365.com', port=587)
