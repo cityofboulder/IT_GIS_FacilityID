@@ -7,6 +7,7 @@ from arcpy import (CreateVersion_management, DeleteVersion_management,
                    ListVersions, CreateDatabaseConnection_management,
                    ReconcileVersions_management)
 
+
 from .. import config
 from .edit import Edit
 
@@ -231,6 +232,102 @@ def remove_files(include: list, exclude: list = []):
     if del_files:
         for d in del_files:
             os.remove(d)
+
+
+def send_email(*attachments):
+    import smtplib
+    from email.MIMEMultipart import MIMEMultipart
+    from email.MIMEText import MIMEText
+    from email.MIMEBase import MIMEBase
+    from email import Encoders
+    # from/to addresses
+    sender = 'noreply@bouldercolorado.gov'
+    password = "password"
+    recipients = ["nestlerj@bouldercolorado.gov",
+                  "jeffreyb@bouldercolorado.gov",
+                  "salmone@bouldercolorado.gov",
+                  "gregoryk@bouldercolorado.gov",
+                  "simpsonj@bouldercolorado.gov",
+                  "spielmanc@bouldercolorado.gov"]
+
+    # message
+    msg = MIMEMultipart('alternative')
+    msg['From'] = sender
+    msg['To'] = "; ".join(recipients)
+    msg['Subject'] = "Facility ID"
+
+    # body
+    if config.post_edits:
+        body = f"""\
+                <html>
+                    <head></head>
+                    <body>
+                        <p>
+                        Dear Human,<br><br>
+                        Versioned edits to Facility IDs have been posted on
+                         your behalf by the GISSCR user.<br><br>
+                        If you have not authorized edits, registered your
+                         data as versioned, or granted GISSCR edit access to
+                         your data, a layer file with a table of joined edits
+                         has been attached to this email for your inspection.
+                        </p>
+                        <p>
+                        Beep Boop Beep,<br><br>
+                        End Transmision
+                        </p>
+                    </body>
+                </html>
+                """
+    else:
+        body = f"""\
+                <html>
+                    <head></head>
+                    <body>
+                        <p>
+                        Dear Human,<br><br>
+                        Versioned edits to Facility IDs have been performed on
+                         your behalf by the GISSCR user.<br><br>
+                        Please navigate to your department's attached layer
+                         file to inspect the versioned edits and post all
+                         changes.<br><br>
+                        If you have not authorized edits, registered your
+                         data as versioned, or granted GISSCR edit access to
+                         your data, your department's layer file contains read-
+                         only layers joined to a table of edits, which you can
+                         manually change sources for each layer and perform the
+                         edits yourself.
+                        </p>
+                        <p>
+                        Beep Boop Beep,<br><br>
+                        End Transmision
+                        </p>
+                    </body>
+                </html>
+                """
+    if attachments:
+        for item in attachments:
+            a = open(item, 'rb')
+            part = MIMEBase('application', 'octet-stream')
+            part.set_payload(a.read())
+            Encoders.encode_base64(part)
+            part.add_header('Content-Disposition', 'attachment',
+                            filename=item.split(os.sep).pop())
+            msg.attach(part)
+
+    msg.attach(MIMEText(body, 'html'))
+
+    # create SMTP object
+    server = smtplib.SMTP(host='smtp.office365.com', port=587)
+    server.ehlo()
+    server.starttls()
+    server.ehlo()
+
+    # log in
+    server.login(sender, password)
+
+    # send email
+    server.sendmail(sender, recipients, msg.as_string())
+    server.quit()
 
 
 def count(obj):

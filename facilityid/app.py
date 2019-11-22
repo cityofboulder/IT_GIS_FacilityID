@@ -1,7 +1,9 @@
+import os
+
 import config
 from utils.management import (delete_facilityid_versions, clear_map_layers,
                               find_in_sde, versioned_connection, remove_files,
-                              reconcile_post, save_layer_files)
+                              reconcile_post, save_layer_files, send_email)
 from utils.identifier import Identifier
 from utils.edit import Edit
 
@@ -77,7 +79,12 @@ def main():
     save_layer_files()
 
     # Step 7: Send an email with results
-    # TODO: Add an email function!
+    esri = r".\\.esri"
+    layer_files = [os.path.join(os.getcwd(), f)
+                   for f in os.listdir(esri) if f.endswith('.sde')]
+    send_email(r".\\facilityid\\log\\facilityid.log",
+               r".\\facilityid\\log\\AllEditsEver.csv",
+               *layer_files)
 
 
 main()
