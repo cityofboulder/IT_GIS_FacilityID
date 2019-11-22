@@ -12,9 +12,9 @@ if __name__ == "__main__":
     except Exception:
         log.exception("Something prevented the script from running")
     finally:
-        for root, _, files in os.walk():
-            conn_files = [os.path.join(root, f)
-                          for f in files if f.endswith(".sde")]
-        if conn_files:
-            for connection in conn_files:
-                os.remove(connection)
+        for root, _, files in os.walk(os.getcwd()):
+            del_files = [os.path.join(root, f) for f in files if any(
+                f.endswith(arg) for arg in [".sde", ".lyrx"])]
+        if del_files:
+            for d in del_files:
+                os.remove(d)
