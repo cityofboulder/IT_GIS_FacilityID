@@ -81,7 +81,7 @@ def main():
 
     # Step 7: Send an email with results
     esri = r".\\.esri"
-    layer_files = [os.path.join(os.getcwd(), f)
+    layer_files = [os.path.join(esri, f)
                    for f in os.listdir(esri) if f.endswith('.lyrx')]
     send_email(r".\\facilityid\\log\\facilityid.log",
                r".\\facilityid\\log\\AllEditsEver.csv",
