@@ -11,4 +11,4 @@ if __name__ == "__main__":
     except Exception:
         log.exception("Something prevented the script from running")
     finally:
-        remove_files(['.sde', '.lyrx'])
+        remove_files(['.sde'])
