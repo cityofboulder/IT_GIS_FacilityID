@@ -90,6 +90,3 @@ def main():
                         r".\\facilityid\\log\\facilityid.log",
                         r".\\facilityid\\log\\AllEditsEver.csv",
                         *[x for x in layer_files if user in x])
-
-
-main()
