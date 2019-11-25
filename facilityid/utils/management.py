@@ -1,5 +1,10 @@
 import csv
 import os
+import smtplib
+from email import encoders
+from email.mime.base import MIMEBase
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 
 import facilityid.config as config
 from arcpy import (CreateDatabaseConnection_management,
@@ -327,11 +332,6 @@ def _email_body(user: str, edited_users: list, success: dict) -> str:
 
 def send_email(user: str, edited_users: list, success: dict, recipients: list,
                *attachments):
-    import smtplib
-    from email.MIMEMultipart import MIMEMultipart
-    from email.MIMEText import MIMEText
-    from email.MIMEBase import MIMEBase
-    from email import Encoders
     # from/to addresses
     sender = 'noreply@bouldercolorado.gov'
     password = "3qIjkh1)vU"
@@ -349,7 +349,7 @@ def send_email(user: str, edited_users: list, success: dict, recipients: list,
             a = open(item, 'rb')
             part = MIMEBase('application', 'octet-stream')
             part.set_payload(a.read())
-            Encoders.encode_base64(part)
+            encoders.encode_base64(part)
             part.add_header('Content-Disposition', 'attachment',
                             filename=item.split(os.sep).pop())
             msg.attach(part)
