@@ -344,11 +344,13 @@ class Edit(Identifier):
                     del editor
                     ClearWorkspaceCache_management()
 
-                    log.info("Successfully performed versioned edits...")
+                    log.info(("Successfully performed versioned edits on "
+                              f"{self.feature_name}..."))
                     # Reset the aprx connection to the versioned connection
                     self.aprx_connection = edit_conn
                 except RuntimeError:
-                    log.exception("Could not perform versioned edits...")
+                    log.exception(("Could not perform versioned edits "
+                                   f"on {self.feature_name}..."))
             log.debug("Logging edits to csv...")
             write_to_csv(r'.\\facilityid\\log\\AllEditsEver.csv', records)
             self.add_to_aprx(records)

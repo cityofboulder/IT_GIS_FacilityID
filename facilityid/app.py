@@ -42,9 +42,9 @@ def main():
                           facilityid.editorTrackingEnabled,
                           facilityid.prefix]
             if not all(essentials):
-                log.error((f"{facilityid.feature_name} does not qualify for "
-                           "analysis because it is missing essential "
-                           "requirements..."))
+                log.warning((f"{facilityid.feature_name} does not qualify for "
+                             "analysis because it is missing essential "
+                             "requirements..."))
                 continue
 
             # Step 4c: Compare Edit object to previous script run
