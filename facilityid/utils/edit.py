@@ -367,13 +367,13 @@ class Edit(Identifier):
 
     def store_current(self):
         with shelve.open('.\\facilityid\\log\\previous_run', 'c') as db:
-            db[self.feature_name] = self
+            db[self.feature_name] = self.__key()
 
     def equals_previous(self):
         try:
             with shelve.open('.\\facilityid\\log\\previous_run', 'c') as db:
                 previous = db[self.feature_name]
-            if self == previous:
+            if self.__key() == previous:
                 return True
             else:
                 return False
