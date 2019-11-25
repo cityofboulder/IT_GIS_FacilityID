@@ -87,6 +87,7 @@ def versioned_connection(edit_obj, parent: str, version_name: str):
                           edit_obj.can_gisscr_edit(config.edit)]
     if all(version_essentials):
         conn_file = os.path.join(".\\.esri", f"{version_name}.sde")
+        full_conn_path = os.path.realpath(conn_file)
         version_owner = "GISSCR"
         full_version_name = f"{version_owner}.{version_name}"
         if os.path.exists(conn_file):
@@ -109,7 +110,7 @@ def versioned_connection(edit_obj, parent: str, version_name: str):
                        **config.db_params}
             CreateDatabaseConnection_management(**connect)
 
-        return conn_file
+        return full_conn_path
 
     else:
         # Logging to understand why the layer cannot be edited in a version
