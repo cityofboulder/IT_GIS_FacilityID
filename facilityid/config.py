@@ -12,6 +12,9 @@ with open(r'.\facilityid\config.yaml') as config_file:
     config = yaml.safe_load(config_file.read())
     logging.config.dictConfig(config['LOGGING'])
 
+# Pro project location
+aprx = config["aprx"]
+
 # Which database?
 db = config["platform"]
 database = config["DATABASES"][db]
