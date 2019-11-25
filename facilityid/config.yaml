@@ -91,7 +91,7 @@ LOGGING:
       handlers: [console, file, email]
     facilityid.app:
       level: INFO
-      handlers: [console, file, email]
+      handlers: [console, file]
     facilityid.utils.edit:
       level: DEBUG
       handlers: [console, file]
