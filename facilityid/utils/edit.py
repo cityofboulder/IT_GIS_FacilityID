@@ -365,15 +365,18 @@ class Edit(Identifier):
         else:
             log.info("No edits were necessary...")
 
-    def equals_previous(self):
-        with shelve.open('.\\facilityid\\log\\previous_run', 'c') as db:
-            previous = db[self.feature_name]
-
-        if self == previous:
-            return True
-        else:
-            return False
-
     def store_current(self):
         with shelve.open('.\\facilityid\\log\\previous_run', 'c') as db:
             db[self.feature_name] = self
+
+    def equals_previous(self):
+        try:
+            with shelve.open('.\\facilityid\\log\\previous_run', 'c') as db:
+                previous = db[self.feature_name]
+            if self == previous:
+                return True
+            else:
+                return False
+        except KeyError:
+            log.debug(f"{self.feature_name} has never been scanned...")
+            pass  # Gets stored later in the script, no need to store at error
