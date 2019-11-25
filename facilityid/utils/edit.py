@@ -251,7 +251,7 @@ class Edit(Identifier):
             old_facid = _merge(edit_row)
             pfix = edit_row["FACILITYID"]["prefix"]
             str_id = edit_row["FACILITYID"]["str_id"]
-            int_id = edit_row["FACILITYID"]["int_id"]
+            # int_id = edit_row["FACILITYID"]["int_id"]
 
             # PREFIX EDITS
             if not pfix or not pfix.isupper() or pfix != self.prefix:
@@ -259,10 +259,8 @@ class Edit(Identifier):
                 edits = True
 
             # ID EDITS
-            # tests = [not str_id, len(str_id) != len(str(int_id)),
-            #          int_id in self.used]
-            # if any(tests):
-            if not str_id or int_id in self.used:
+            # if not str_id or len(str_id) != len(str(int_id)):
+            if not str_id:
                 new_id = self._new_id()
                 edit_row["FACILITYID"]["int_id"] = new_id
                 edit_row["FACILITYID"]["str_id"] = str(new_id)
