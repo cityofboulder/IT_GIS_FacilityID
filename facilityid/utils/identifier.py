@@ -1,6 +1,7 @@
 import os
 import re
 
+import facilityid.config as config
 from arcpy import ArcSDESQLExecute, Describe, ExecuteError, ListFields
 from arcpy.da import SearchCursor
 
@@ -14,39 +15,27 @@ class Identifier:
     def __init__(self, tuple_path):
         self.tuple_path = tuple_path
         self.full_path = os.path.join(*self.tuple_path)
+        self._desc = Describe(self.full_path)
+
         self.connection = self.tuple_path[0]
+        self.database = config.db  # Database platform from config file
         self.dataset = self._dataset()
         self.feature_name = self.tuple_path[-1]
         self.owner = self._owner()
         self.name = self._name()
         self.database_name = self._database_name()
-        self.shape = self._shape()
 
         self.has_table = self.datasetType in ['FeatureClass', 'Table']
         self.fields = [f.name for f in ListFields(self.full_path)]
         self.has_facilityid = "FACILITYID" in self.fields
         self.has_globalid = "GLOBALID" in self.fields
         self.prefix = self._prefix()
-
-        self._desc = Describe(self.full_path)
+        self.shape = self._shape()
 
     def __getattr__(self, item):
         """Pass any other attribute or method calls through to the
         underlying Describe object"""
         return getattr(self._desc, item)
-
-    def _database(self):
-        """Return the database client name"""
-        parts = self.feature_name.split('.')
-
-        # SQL Server follows the pattern db.owner.name
-        if len(parts) == 3:
-            db = 'MSSQL'
-        # Oracle follows the pattern owner.name
-        else:
-            db = 'ORACLE'
-
-        return db
 
     def _dataset(self):
         """Return the name of the dataset, if it exists"""
@@ -56,9 +45,9 @@ class Identifier:
         """Get the name of the feature's owner"""
         parts = self.feature_name.split('.')
 
-        if self._database() == 'MSSQL':
+        if len(parts) == 3:  # SQLSERVER names are DATABASE.OWNER.FEATURE
             owner = parts[1]
-        if self._database() == 'ORACLE':
+        else:  # ORACLE names are OWNER.FEATURE
             owner = parts[0]
 
         return owner
@@ -81,7 +70,7 @@ class Identifier:
         """
 
         name = ".".join([self.owner, self.name[:128]]).upper()
-        if self._database() == 'ORACLE':
+        if self.database == 'ORACLE':
             if self.isVersioned:
                 name = ".".join([self.owner, self.name[:26]]).upper() + "_EVW"
             else:
