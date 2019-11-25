@@ -74,7 +74,7 @@ LOGGING:
       class: logging.FileHandler
       level: INFO
       formatter: only
-      filename: '.\facilityid\log\facilityid.log'
+      filename: '.\\facilityid\\log\\facilityid.log'
     email:
       class: logging.handlers.SMTPHandler
       mailhost: ["smtp.office365.com", 587]
@@ -89,16 +89,16 @@ LOGGING:
     __main__:
       level: INFO
       handlers: [console, file, email]
-    app:
+    facilityid.app:
       level: INFO
       handlers: [console, file, email]
-    edit:
+    facilityid.utils.edit:
       level: DEBUG
       handlers: [console, file]
-    identifier:
+    facilityid.utils.identifier:
       level: DEBUG
       handlers: [console, file]
-    management:
+    facilityid.utils.management:
       level: DEBUG
       handlers: [console, file]
 
