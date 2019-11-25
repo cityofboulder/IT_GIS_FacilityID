@@ -26,7 +26,7 @@ class Identifier:
         self.database_name = self._database_name()
 
         self.has_table = self.datasetType in ['FeatureClass', 'Table']
-        self.fields = [f.name for f in ListFields(self.full_path)]
+        self.fields = self._fields()
         self.has_facilityid = "FACILITYID" in self.fields
         self.has_globalid = "GLOBALID" in self.fields
         self.prefix = self._prefix()
@@ -95,11 +95,22 @@ class Identifier:
                     FETCH FIRST ROW ONLY"""
             try:
                 result = execute_object.execute(query)
-                return result[0]
+                return result[0][0]
             except (ExecuteError, TypeError, AttributeError):
                 return None
         else:
             return None
+
+    def _fields(self):
+        """Determines the field names in the table
+        """
+        try:
+            result = [f.name for f in ListFields(self.full_path)]
+        # If a feature is a network dataset or topology, no fields exist
+        # and a RuntimeError is raised
+        except RuntimeError:
+            result = list()
+        return result
 
     def record_count(self) -> bool:
         """Determines if there are any records in the feature class to
