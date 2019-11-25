@@ -86,7 +86,7 @@ def versioned_connection(edit_obj, parent: str, version_name: str):
                           edit_obj.isVersioned,
                           edit_obj.can_gisscr_edit(config.edit)]
     if all(version_essentials):
-        conn_file = os.path.join(os.getcwd, f"{version_name}.sde")
+        conn_file = os.path.join(".\\.esri", f"{version_name}.sde")
         version_owner = "GISSCR"
         full_version_name = f"{version_owner}.{version_name}"
         if os.path.exists(conn_file):
@@ -103,7 +103,7 @@ def versioned_connection(edit_obj, parent: str, version_name: str):
 
             # Create the database connection file
             log.debug(f"Creating a versioned db connection at {conn_file}...")
-            connect = {"out_folder_path": os.getcwd(),
+            connect = {"out_folder_path": ".\\.esri",
                        "out_name": f"{version_name}.sde",
                        "version": full_version_name,
                        **config.db_params}
@@ -333,7 +333,7 @@ def send_email(user: str, edited_users: list, success: dict, recipients: list,
     from email import Encoders
     # from/to addresses
     sender = 'noreply@bouldercolorado.gov'
-    password = "password"
+    password = "3qIjkh1)vU"
 
     # message
     msg = MIMEMultipart('alternative')
