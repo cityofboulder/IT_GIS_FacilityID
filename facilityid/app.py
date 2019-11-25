@@ -23,7 +23,7 @@ def main():
 
     # Iterate through each configured versioned edit procedure
     post_success = list()
-    for parent, options in config.procedure:
+    for parent, options in config.procedure.items():
         # Step 3: Obtain tuples of system paths for every fc
         log.info("Evaluating which SDE items to evaluate based on filters...")
         features = mgmt.find_in_sde(config.read, options['include'],
