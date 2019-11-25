@@ -42,19 +42,21 @@ def main():
                           facilityid.editorTrackingEnabled,
                           facilityid.prefix]
             if not all(essentials):
-                log.error(("The layer does not qualify for analysis because "
-                          "it is missing essential requirements..."))
+                log.error((f"{facilityid.feature_name} does not qualify for "
+                           "analysis because it is missing essential "
+                           "requirements..."))
                 continue
 
             # Step 4c: Compare Edit object to previous script run
             editor = edit.Edit(feature)
             if editor.equals_previous():
-                log.info("No records have been edited since the last run...")
+                log.info(("No records have been edited in "
+                          f"{editor.feature_name} since the last run..."))
                 continue
 
             # Step 4d: Create versioned connection, if applicable
             suffix = options["version_suffix"]
-            version_name = f"{editor.user}{suffix}"
+            version_name = f"{editor.owner}{suffix}"
             conn_file = mgmt.versioned_connection(editor, parent, version_name)
 
             # Step 4e: Perform edits
