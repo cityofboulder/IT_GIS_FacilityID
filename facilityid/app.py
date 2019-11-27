@@ -36,6 +36,9 @@ def main():
             log.info(f"Analyzing {facilityid.feature_name}...")
 
             # Step 4b: Make preliminary checks before analyzing the feature
+            if facilityid.datasetType not in ['FeatureClass', 'Table']:
+                log.info(f"{facilityid.feature_name} is not eligible...")
+                continue
             essentials = [facilityid.has_table,
                           facilityid.has_facilityid,
                           facilityid.has_globalid,
