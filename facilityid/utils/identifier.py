@@ -220,8 +220,11 @@ class Identifier:
         execute_object = ArcSDESQLExecute(connection)
         result = execute_object.execute(query)
         editable = False  # Assume GISSCR user cannot edit by default
-        for row in result:
-            if row[0] in ("UPDATE", "INSERT", "DELETE"):
-                editable = True
-                break
+        try:
+            for row in result:
+                if row[0] in ("UPDATE", "INSERT", "DELETE"):
+                    editable = True
+                    break
+        except TypeError:
+            pass  # result = True when the table cannot be accessed by GISSCR
         return editable
