@@ -120,11 +120,12 @@ def versioned_connection(edit_obj, parent: str, version_name: str):
     else:
         # Logging to understand why the layer cannot be edited in a version
         if not version_essentials[0]:
-            log.error("Edits are not authorized by the data owner...")
+            log.warning("Edits are not authorized by the data owner...")
         if not version_essentials[1]:
-            log.error("The layer is not registered as versioned...")
+            log.warning(f"{version_name} is not registered as versioned...")
         if not version_essentials[2]:
-            log.error("The layer is not editable by the GISSCR user...")
+            log.warning(
+                f"{version_name} is not editable by the GISSCR user...")
 
         return ""
 
@@ -198,6 +199,7 @@ def clear_map_layers():
         if del_layers:
             for d in del_layers:
                 map_.removeLayer(d)
+    aprx.save()
 
 
 def save_layer_files():
