@@ -86,7 +86,11 @@ def main():
     layer_files = [os.path.join(esri, f)
                    for f in os.listdir(esri) if f.endswith('.lyrx')]
     for user, stewards in config.recipients.items():
-        mgmt.send_email(user, edit.Edit.edited_users, post_success, stewards,
-                        r".\\facilityid\\log\\facilityid.log",
-                        r".\\facilityid\\log\\AllEditsEver.csv",
-                        *[x for x in layer_files if user in x])
+        body = mgmt.email_body(user, edit.Edit.edited_users, post_success)
+        if user in edit.Edit.edited_users:
+            mgmt.send_email(body, stewards,
+                            r".\\facilityid\\log\\facilityid.log",
+                            r".\\facilityid\\log\\AllEditsEver.csv",
+                            *[x for x in layer_files if user in x])
+        else:
+            mgmt.send_email(body, stewards)

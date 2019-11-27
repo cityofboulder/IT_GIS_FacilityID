@@ -264,7 +264,7 @@ def remove_files(include: list, exclude: list = []):
             os.remove(d)
 
 
-def _email_body(user: str, edited_users: list, success: dict) -> str:
+def email_body(user: str, edited_users: list, success: dict) -> str:
     """Defines the main body of the email sent at the end of the script.
 
     Parameters:
@@ -330,8 +330,7 @@ def _email_body(user: str, edited_users: list, success: dict) -> str:
     return body
 
 
-def send_email(user: str, edited_users: list, success: dict, recipients: list,
-               *attachments):
+def send_email(body: str, recipients: list, *attachments):
     # from/to addresses
     sender = 'noreply@bouldercolorado.gov'
     password = "3qIjkh1)vU"
@@ -342,8 +341,6 @@ def send_email(user: str, edited_users: list, success: dict, recipients: list,
     msg['To'] = "; ".join(recipients)
     msg['Subject'] = "Facility ID"
 
-    # body
-    body = _email_body(user, edited_users, success)
     if attachments:
         for item in attachments:
             a = open(item, 'rb')
