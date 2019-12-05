@@ -5,6 +5,9 @@ import facilityid.config as config
 from arcpy import ArcSDESQLExecute, Describe, ExecuteError, ListFields
 from arcpy.da import SearchCursor
 
+# Initialize the logger for this file
+log = config.logging.getLogger(__name__)
+
 
 class Identifier:
     """A class intended to deal with the specifics of controlling for
@@ -127,16 +130,17 @@ class Identifier:
     def duplicates(self):
         # Initialize an executor object for SDE
         execute_object = ArcSDESQLExecute(self.connection)
-        query = f"""SELECT a.FACILITYID,
-                    a.GLOBALID
+        query = f"""SELECT a.GLOBALID,
+                           a.FACILITYID
                     FROM {self.database_name} a
-                    JOIN (SELECT FACILITYID,
-                        GLOBALID,
-                        COUNT(*)
+                    INNER JOIN (
+                        SELECT FACILITYID
                         FROM {self.database_name}
-                        GROUP BY FACILITYID, GLOBALID
-                        HAVING COUNT(*) > 1) b
-                    ON a.GLOBALID = b.GLOBALID"""
+                        GROUP BY FACILITYID
+                        HAVING COUNT(*) > 1
+                    ) dups
+                    ON dups.FACILITYID = a.FACILITYID;"""
+
         try:
             result = execute_object.execute(query)
             globalids = [r[1] for r in result if r[0]]
