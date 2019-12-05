@@ -4,15 +4,20 @@ aprx: ".\\.esri\\EditMaps.aprx"
 # Database platform: ORACLE or SQLSERVER?
 platform: "ORACLE"
 
-# Post after making versioned edits?
-post_edits: False
-
-# Users that authorize versioned edits
-authorizes_edits:
-  "UTIL": True
-  "TRANS": True
-  "PW": True
-  "PARKS": False
+# Which users authorize versioned edits and post control?
+authorization:
+  UTIL:
+    versioned_edits: True
+    post_edits: False
+  TRANS:
+    versioned_edits: True
+    post_edits: False
+  PW:
+    versioned_edits: True
+    post_edits: False
+  PARKS:
+    versioned_edits: True
+    post_edits: False
 
 # Will edits all come from a single parent or multiple parents?
 single_parent: True
@@ -43,18 +48,20 @@ multiple:
 recipients:
   UTIL: 
     - "nestlerj@bouldercolorado.gov"
-    - "jefferyb@bouldercolorado.gov"
+    - "jeffreyb@bouldercolorado.gov"
     - "salmone@bouldercolorado.gov"
-  TRANS: 
+  TRANS:
+    - "nestlerj@bouldercolorado.gov"
     - "simpsonj@bouldercolorado.gov"
     - "gregoryk@bouldercolorado.gov"
   PW: 
     - "nestlerj@bouldercolorado.gov"
-    - "jefferyb@bouldercolorado.gov"
+    - "jeffreyb@bouldercolorado.gov"
     - "salmone@bouldercolorado.gov"
     - "simpsonj@bouldercolorado.gov"
     - "gregoryk@bouldercolorado.gov"
   PARKS: 
+    - "nestlerj@bouldercolorado.gov"
     - "spielmanc@bouldercolorado.gov"
 
 # Logging Configurations
