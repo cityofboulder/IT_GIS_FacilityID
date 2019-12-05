@@ -86,7 +86,7 @@ def versioned_connection(edit_obj, parent: str, version_name: str):
         versioned edits cannot be performed.
     """
 
-    authorized = edit_obj.owner in config.auth
+    authorized = edit_obj.owner in config.versioned_edits
     version_essentials = [authorized,
                           edit_obj.isVersioned,
                           edit_obj.can_gisscr_edit(config.edit)]
@@ -143,34 +143,26 @@ def reconcile_post(parent: str, version: str) -> dict:
     Returns
     -------
     dict
-        A dictionary of parent : success/failure of version post
+        A dictionary of version:(success/failure of version post) pairs
     """
 
-    rec_post_log = dict()
-    reconcile_kwargs = {"input_database": config.edit,
-                        "reconcile_mode": "ALL_VERSIONS",
-                        "target_version": parent,
-                        "edit_versions": version,
-                        "abort_if_conflicts": True,
-                        "conflict_definition": "BY_OBJECT"}
-    if config.post_edits:
-        reconcile_kwargs = {**reconcile_kwargs,
-                            "acquire_locks": True,
-                            "with_post": True,
-                            "with_delete": False}
+    post_kwargs = {"input_database": config.edit,
+                   "reconcile_mode": "ALL_VERSIONS",
+                   "target_version": parent,
+                   "edit_versions": version,
+                   "abort_if_conflicts": True,
+                   "conflict_definition": "BY_OBJECT",
+                   "acquire_locks": True,
+                   "with_post": True,
+                   "with_delete": False}
 
     try:
-        log.info(f"Reconciling {version} against {parent}...")
-        ReconcileVersions_management(**reconcile_kwargs)
-        if config.post_edits:
-            rec_post_log[parent] = True
-        else:
-            rec_post_log[parent] = False
+        log.info(f"Posting edits in {version} to {parent}...")
+        ReconcileVersions_management(**post_kwargs)
+        return True
     except ExecuteError:
         log.exception("Could not reconcile and post...")
-        rec_post_log[parent] = False
-
-    return rec_post_log
+        return False
 
 
 def delete_facilityid_versions(connection: str) -> None:
