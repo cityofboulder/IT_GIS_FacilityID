@@ -27,7 +27,8 @@ edit = database["connections"]["edit"]
 db_params = database["info"]
 
 # Data owners that authorize versioned edits
-auth = [k for k, v in config["authorization"].items() if v["versioned_edits"]]
+versioned_edits = [
+    k for k, v in config["authorization"].items() if v["versioned_edits"]]
 
 # Data owners that authorize posting edits
 post_edits = [k for k, v in config["authorization"].items()
