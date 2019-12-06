@@ -1,5 +1,3 @@
-import os
-
 import facilityid.app as app
 import facilityid.config as config
 from facilityid.utils.management import list_files
@@ -13,6 +11,4 @@ if __name__ == "__main__":
     except Exception:
         log.exception("Something prevented the script from running")
     finally:
-        del_ = list_files(['.sde'])
-        for d in del_:
-            os.remove(d)
+        list_files(['.sde'], delete=True)

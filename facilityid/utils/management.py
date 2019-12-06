@@ -234,7 +234,7 @@ def write_to_csv(csv_file: str, rows: list):
             writer.writerow(row)
 
 
-def list_files(include: list, exclude: list = []):
+def list_files(include: list, exclude: list = [], delete: bool = False):
     """Lists files from the package's root directory based on the
     filters provided in the positional args.
 
@@ -246,6 +246,15 @@ def list_files(include: list, exclude: list = []):
     exclude : list
         If any keyword in this parameter appears in the file name, it
         will not be added to the list
+    delete : bool
+        A trigger to delete the files listed
+
+    Returns:
+    --------
+    list
+        A list of system paths to the files that match the spec'd
+        criteria. If the delete flag is raised, an empty list is
+        returned
     """
     listed = list()
     for root, _, files in os.walk(os.getcwd()):
@@ -254,7 +263,11 @@ def list_files(include: list, exclude: list = []):
                    arg not in f for arg in exclude):
                 listed.append(os.path.join(root, f))
 
-    return listed
+    if delete:
+        for d in listed:
+            os.remove(d)
+    else:
+        return listed
 
 
 def email_matter(user: str, posted_successfully: list, attach_list: list):
