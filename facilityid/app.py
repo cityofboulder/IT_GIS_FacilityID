@@ -34,18 +34,7 @@ def main():
             log.info(f"Analyzing {facilityid.feature_name}...")
 
             # Step 4b: Make preliminary checks before analyzing the feature
-            if facilityid.datasetType not in ['FeatureClass', 'Table']:
-                log.info(f"{facilityid.feature_name} is not eligible...")
-                continue
-            essentials = [facilityid.has_table,
-                          facilityid.has_facilityid,
-                          facilityid.has_globalid,
-                          facilityid.editorTrackingEnabled,
-                          facilityid.prefix]
-            if not all(essentials):
-                log.warning((f"{facilityid.feature_name} does not qualify for "
-                             "analysis because it is missing essential "
-                             "requirements..."))
+            if not facilityid.essentials():
                 continue
 
             # Step 4c: Compare Edit object to previous script run

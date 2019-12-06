@@ -15,6 +15,9 @@ class Identifier:
     of the arcpy.Describe function.
     """
 
+    inspected_users = list()  # list all users that were inspected
+    failures = list()  # list of all layers that failed evaluation
+
     def __init__(self, tuple_path):
         self.tuple_path = tuple_path
         self.full_path = os.path.join(*self.tuple_path)
@@ -126,6 +129,45 @@ class Identifier:
         except ExecuteError:
             # TODO: Add info logging
             return None
+
+    def essentials(self) -> bool:
+        """Tests whether the feature is eligible for a Facility ID scan.
+
+        In order to be considered for a scan, the layer must have a
+        GLOBALID filed, have editor tracking turned on, and have at
+        least one record that contains a Facility ID.
+
+        Returns
+        -------
+        bool
+            Whether the object passes the test
+        """
+
+        result = False  # Assume the layer will be skipped
+        essentials = {"1 - Enable GLOBALIDs": self.has_globalid,
+                      "2 - Enable Editor Tracking": self.editorTrackingEnabled,
+                      "3 - Give one record an ID": self.prefix}
+        if self.has_table:
+            if self.has_facilityid:
+                if all(essentials.values()):
+                    if self.owner not in self.inspected_users:
+                        self.inspected_users.append(self.owner)
+                    result = True
+                else:
+                    # Catalog what went wrong and log to the failures variable
+                    wrong = {"0 - Feature": self.feature_name}
+                    for k, v in essentials.items():
+                        wrong = {**wrong, k: "X" if not v else ""}
+                    self.failures.append(wrong)
+            else:
+                log.warning((f"{self.feature_name}  does not have a "
+                             "FACILITYID field..."))
+        else:
+            log.warning((f"{self.feature_name} does not qualify for "
+                         "analysis because it is not a feature class "
+                         "or table..."))
+
+        return result
 
     def duplicates(self):
         # Initialize an executor object for SDE
