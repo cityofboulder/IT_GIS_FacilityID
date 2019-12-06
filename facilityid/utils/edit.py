@@ -48,6 +48,7 @@ class Edit(Identifier):
 
     edited_users = list()  # Data owners that had edits performed
     edited_features = dict()  # {"FeatureName1": total edit count, ...}
+    version_failures = list()  # Layers that can't have versioned edits done
 
     def __init__(self, tuple_path):
         super().__init__(tuple_path)
@@ -271,6 +272,36 @@ class Edit(Identifier):
                 edited.append(r)
 
         return edited
+
+    def version_essentials(self) -> bool:
+        """Tests whether the feature is eligible for versioned edits.
+
+        In order to be edited, the feature must have been authorized
+
+        Returns
+        -------
+        bool
+            Whether the object passes the test
+        """
+
+        result = False  # Assume the layer will be skipped
+        essentials = {
+            "1 - Register as Versioned": self.isVersioned,
+            "2 - Grant GISSCR Privileges": self.can_gisscr_edit(config.edit)}
+
+        if self.owner in config.versioned_edits:
+            if all(essentials.values()):
+                result = True
+            else:
+                # Catalog what went wrong and log to the failures variable
+                wrong = {"0 - Feature": self.feature_name}
+                for k, v in essentials.items():
+                    wrong = {**wrong, k: "X" if not v else ""}
+                self.version_failures.append(wrong)
+        else:
+            log.debug(f"{self.owner} has not authorized versioned edits...")
+
+        return result
 
     def add_to_aprx(self, edit_rows):
         """Adds the input layer to a .aprx Map based on the owner of the
