@@ -270,6 +270,37 @@ def list_files(include: list, exclude: list = [], delete: bool = False):
         return listed
 
 
+def create_html_table(data: list) -> str:
+    """Creates table encoded in HTML
+
+    Parameters
+    ----------
+    data : list
+        A list of dicts, where each dict has "col_name": value pairs
+
+    Returns
+    -------
+    str
+        A table coded with HTML tags
+    """
+
+    # Encode headers into HTML
+    headers = "".join([f"<th>{x}</th>" for x in data[0].keys()])
+    header_row = f"<tr>{headers}</tr>"
+
+    # Encode table data
+    table_data = ""
+    for dict_row in data:
+        row_data = "".join([f"<td>{x}</td>" for x in dict_row.values()])
+        table_row = f"<tr>{row_data}</tr>"
+        table_data += table_row
+
+    # Combine into a single table
+    table = f"<table>{header_row}{table_data}</table>"
+
+    return table
+
+
 def email_matter(user: str, posted_successfully: list, attach_list: list):
     """Defines the main body of the email sent at the end of the script,
     and also returns attachments
