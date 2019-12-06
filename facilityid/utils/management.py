@@ -67,13 +67,11 @@ def find_in_sde(sde_path: str, includes: list = [], excludes: list = []):
     return items
 
 
-def versioned_connection(edit_obj, parent: str, version_name: str):
+def versioned_connection(parent: str, version_name: str):
     """Create a version and associated versioned database connection.
 
     Parameters
     ----------
-    edit_obj : Edit object
-        The Edit object of the feature class being analyzed
     parent : str
         The parent of the edit version to be created
     version_name : str
@@ -82,52 +80,36 @@ def versioned_connection(edit_obj, parent: str, version_name: str):
     Returns
     -------
     str
-        A file path to the proper connection file, or an empty string if
-        versioned edits cannot be performed.
+        A file path to the proper connection file
     """
 
-    authorized = edit_obj.owner in config.versioned_edits
-    version_essentials = [authorized,
-                          edit_obj.isVersioned,
-                          edit_obj.can_gisscr_edit(config.edit)]
-    if all(version_essentials):
-        conn_file = os.path.join(".\\.esri", f"{version_name}.sde")
+    conn_file = os.path.join(".\\.esri", f"{version_name}.sde")
+
+    if os.path.exists(conn_file):
+        log.debug(f"{version_name} has already been created...")
+    else:
         full_conn_path = os.path.realpath(conn_file)
         version_owner = "GISSCR"
         full_version_name = f"{version_owner}.{version_name}"
-        if os.path.exists(conn_file):
-            log.debug(f"{version_name} has already been created...")
-        else:
-            # Create the version
-            log.debug((f"Creating a version called {version_name} owned by "
-                       f"{version_owner}..."))
-            version = {"in_workspace": config.edit,
-                       "parent_version": parent,
-                       "version_name": version_name,
-                       "access_permission": "PRIVATE"}
-            CreateVersion_management(**version)
 
-            # Create the database connection file
-            log.debug(f"Creating a versioned db connection at {conn_file}...")
-            connect = {"out_folder_path": ".\\.esri",
-                       "out_name": f"{version_name}.sde",
-                       "version": full_version_name,
-                       **config.db_params}
-            CreateDatabaseConnection_management(**connect)
+        # Create the version
+        log.debug((f"Creating a version called {version_name} owned by "
+                   f"{version_owner}..."))
+        version = {"in_workspace": config.edit,
+                   "parent_version": parent,
+                   "version_name": version_name,
+                   "access_permission": "PRIVATE"}
+        CreateVersion_management(**version)
 
-        return full_conn_path
+        # Create the database connection file
+        log.debug(f"Creating a versioned db connection at {conn_file}...")
+        connect = {"out_folder_path": ".\\.esri",
+                   "out_name": f"{version_name}.sde",
+                   "version": full_version_name,
+                   **config.db_params}
+        CreateDatabaseConnection_management(**connect)
 
-    else:
-        # Logging to understand why the layer cannot be edited in a version
-        if not version_essentials[0]:
-            log.warning("Edits are not authorized by the data owner...")
-        if not version_essentials[1]:
-            log.warning(f"{version_name} is not registered as versioned...")
-        if not version_essentials[2]:
-            log.warning(
-                f"{version_name} is not editable by the GISSCR user...")
-
-        return ""
+    return full_conn_path
 
 
 def reconcile_post(parent: str, version: str) -> dict:

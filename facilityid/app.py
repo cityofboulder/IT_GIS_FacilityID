@@ -44,11 +44,15 @@ def main():
                           f"{editor.feature_name} since the last run..."))
                 continue
 
-            # Step 4d: Create versioned connection, if applicable
-            suffix = options["version_suffix"]
-            version_name = f"{editor.owner}{suffix}"
-            conn_file = mgmt.versioned_connection(editor, parent, version_name)
-            versions[version_name] = {"parent": parent, "posted": False}
+            # Step 4d: Check version requirements
+            if editor.version_essentials():
+                suffix = options["version_suffix"]
+                v_name = f"{editor.owner}{suffix}"
+                conn_file = mgmt.versioned_connection(parent, v_name)
+                if v_name not in versions.keys():
+                    versions[v_name] = {"parent": parent, "posted": False}
+            else:
+                conn_file = ""
 
             # Step 4e: Perform edits
             log.info((f"Attempting versioned edits on {editor.feature_name} "
