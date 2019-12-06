@@ -1,5 +1,3 @@
-import os
-
 import facilityid.config as config
 import facilityid.utils.edit as edit
 import facilityid.utils.identifier as identify
@@ -15,14 +13,14 @@ def main():
     # Step 1: Delete all existing Facility ID versions and old files
     log.info("Deleting old Facility ID versions...")
     mgmt.delete_facilityid_versions(config.edit)
-    mgmt.remove_files(['.sde', '.lyrx', '.csv'], ['AllEditsEver'])
+    mgmt.list_files(['.sde', '.lyrx', '.csv'], ['AllEditsEver'], True)
 
     # Step 2: Clear layers from all edit maps in Pro
     log.info("Removing layers from maps in the FacilityID Pro project...")
     mgmt.clear_map_layers()
 
+    versions = dict()  # a dict to keep track of all the created versions
     # Iterate through each configured versioned edit procedure
-    post_success = dict()
     for parent, options in config.procedure.items():
         # Step 3: Obtain tuples of system paths for every fc
         log.info("Evaluating which SDE items to evaluate based on filters...")
@@ -61,6 +59,7 @@ def main():
             suffix = options["version_suffix"]
             version_name = f"{editor.owner}{suffix}"
             conn_file = mgmt.versioned_connection(editor, parent, version_name)
+            versions[version_name] = {"parent": parent, "posted": False}
 
             # Step 4e: Perform edits
             log.info((f"Attempting versioned edits on {editor.feature_name} "
@@ -74,26 +73,31 @@ def main():
             # Step 4g: Delete object instances from memory
             del editor, facilityid
 
-        # Step 5: Reconcile edit version (and post, depending on config)
-        if conn_file:
-            post_status = mgmt.reconcile_post(parent, version_name)
-            post_success = {**post_success, **post_status}
+    # Step 5: Email users that were inspected but did not need edits
+    i_users = identify.Identifier.inspected_users  # Users that were inspected
+    e_users = edit.Edit.edited_users  # Users that needed edits
+    n_users = list(set(i_users) - set(e_users))  # Inspected users w/ no edits
+    for user in n_users:
+        body = (f"None of the features owned by {user} required Facility ID "
+                "edits. \N{party popper}")
+        mgmt.send_email(body, config.recipients[user])
 
-    # Step 6: Save layer files if posts were not authorized or completed
-    log.info("Saving layer files...")
-    if not config.post_edits or any(not x for x in post_success.values()):
-        mgmt.save_layer_files()
+    # Step 6: Loop through all users that had edits performed
+    for user in e_users:
+        # Step 6a: Post edits or save layer files
+        user_versions = {k: v for k, v in versions.items() if user in k}
+        for version, info in user_versions.items():
+            if user in config.post_edits:
+                succeeded = mgmt.reconcile_post(info["parent"], version)
+                if succeeded:
+                    info["posted"] = True
+            else:
+                if user in config.versioned_edits or not info["posted"]:
+                    log.info("Saving layer files...")
+                    mgmt.save_layer_files()
 
-    # Step 7: Send an email with results
-    esri = r".\\.esri"
-    layer_files = [os.path.join(esri, f)
-                   for f in os.listdir(esri) if f.endswith('.lyrx')]
-    for user, stewards in config.recipients.items():
-        body = mgmt.email_body(user, edit.Edit.edited_users, post_success)
-        if user in edit.Edit.edited_users:
-            mgmt.send_email(body, stewards,
-                            r".\\facilityid\\log\\facilityid.log",
-                            r".\\facilityid\\log\\AllEditsEver.csv",
-                            *[x for x in layer_files if user in x])
-        else:
-            mgmt.send_email(body, stewards)
+        # Step 6b: Send an email with results
+        all_files = mgmt.list_files(['.csv.', '.lyrx'])
+        post = [v["posted"] for v in user_versions.values()]
+        body, files = mgmt.email_matter(user, post, all_files)
+        mgmt.send_email(body, config.recipients[user], *files)
