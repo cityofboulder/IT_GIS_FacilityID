@@ -234,7 +234,7 @@ def write_to_csv(csv_file: str, rows: list):
             writer.writerow(row)
 
 
-def remove_files(include: list, exclude: list = []):
+def list_files(include: list, exclude: list = []):
     """Removes files from their directories based on filters provided.
 
     Parameters
@@ -246,16 +246,14 @@ def remove_files(include: list, exclude: list = []):
         If any keyword in this parameter appears in the file name, it
         will not be deleted
     """
-    del_files = list()
+    listed = list()
     for root, _, files in os.walk(os.getcwd()):
         for f in files:
             if any(arg in f for arg in include) and all(
                    arg not in f for arg in exclude):
-                del_files.append(os.path.join(root, f))
+                listed.append(os.path.join(root, f))
 
-    if del_files:
-        for d in del_files:
-            os.remove(d)
+    return listed
 
 
 def email_body(user: str, edited_users: list, success: dict) -> str:
