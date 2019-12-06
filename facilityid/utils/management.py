@@ -235,16 +235,17 @@ def write_to_csv(csv_file: str, rows: list):
 
 
 def list_files(include: list, exclude: list = []):
-    """Removes files from their directories based on filters provided.
+    """Lists files from the package's root directory based on the
+    filters provided in the positional args.
 
     Parameters
     ----------
     include : list
-        If any string keyword in args appears in the file name, it will
-        be deleted
+        If any string keyword in this parameter appears in the file
+        name, it will be added to the list
     exclude : list
         If any keyword in this parameter appears in the file name, it
-        will not be deleted
+        will not be added to the list
     """
     listed = list()
     for root, _, files in os.walk(os.getcwd()):
@@ -256,53 +257,46 @@ def list_files(include: list, exclude: list = []):
     return listed
 
 
-def email_body(user: str, edited_users: list, success: dict) -> str:
-    """Defines the main body of the email sent at the end of the script.
+def email_matter(user: str, posted_successfully: list, attach_list: list):
+    """Defines the main body of the email sent at the end of the script,
+    and also returns attachments
 
     Parameters:
     -----------
     user : str
-        The user email being sent
-    edited_users : list
-        All users that have edited layers
-    success : dict
-        Boolean values for each parent version describing whether
-        versions have been successfully posted.
+        The data owner being emailed
+    posted_successfully : list
+        A list of bools for whether all versions posted successfully
+    attach_list : list
+        List of all files that might need to be emailed
 
     Returns:
     --------
     str
         A str with HTML tags that makes up the main body of the email
+    list
+        A list of system paths to files that need to be attached to the
+        email
     """
 
-    if user in edited_users:
-        if config.post_edits:
-            if all(success.values()):
-                insert = ("Versioned edits to Facility IDs have been posted "
-                          "on your behalf by the GISSCR user.")
-            else:
-                insert = ("The GISSCR user attempted to post Facility ID "
-                          "edits on your behalf, but encountered "
-                          "errors while posting one or more of the child "
-                          "versions .<br><br>"
-                          "A layer file with versioned connections to your "
-                          "data has been attached to this email for you to "
-                          "post manually.")
+    attach = []
+    if user in config.versioned_edits:
+        if all(posted_successfully):
+            insert = ("Versioned edits to Facility IDs have been posted "
+                      "on your behalf. \N{High Voltage Sign} <br><br>")
         else:
-            insert = (" Versioned edits to Facility IDs have been performed "
-                      "on your behalf by the GISSCR user.<br><br>"
-                      "Please navigate to your department's attached layer "
-                      "file to inspect the versioned edits and post all "
-                      "changes.<br><br>"
-                      "If you have not authorized edits, registered your data "
-                      "as versioned, or granted GISSCR edit access to your "
-                      "data, your department's layer file contains read-only "
-                      "layers joined to a table of edits. You can manually "
-                      "change sources for each layer and perform the edits "
-                      "yourself.")
+            insert = ("Versioned edits were made on your behalf. Any versions "
+                      "that were not posted automatically are attached as one "
+                      "or more layer files. Open those layer files and "
+                      "reconcile/post the changes. <br><br>")
+            attach = [x for x in attach_list if all(
+                arg in x for arg in [user, '.lyrx'])]
     else:
-        insert = (f"None of the features owned by {user} required Facility ID "
-                  "edits. Congratulations!")
+        insert = ("You have not authorized versioned edits, but your data is "
+                  "in need of edits. You can join the attached .csv files to "
+                  "the proper layers and edit any way you see fit. <br><br>")
+        attach = [x for x in attach_list if all(
+            arg in x for arg in [user, '.csv'])]
 
     body = f"""\
                 <html>
@@ -319,7 +313,7 @@ def email_body(user: str, edited_users: list, success: dict) -> str:
                     </body>
                 </html>
                 """
-    return body
+    return body, attach
 
 
 def send_email(body: str, recipients: list, *attachments):
