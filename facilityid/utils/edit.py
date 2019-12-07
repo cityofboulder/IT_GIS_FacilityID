@@ -5,7 +5,7 @@ from datetime import date, datetime
 import facilityid.config as config
 from arcpy import AddJoin_management, ClearWorkspaceCache_management
 from arcpy.da import Editor, UpdateCursor
-from arcpy.mp import ArcGISProject
+from arcpy.mp import ArcGISProject, LayerFile
 
 from .identifier import Identifier
 from .management import write_to_csv
@@ -56,7 +56,6 @@ class Edit(Identifier):
         self.duplicates = self.duplicates()
         self.used = self._used()
         self.unused = self._unused()
-        self.aprx_connection = self.full_path
 
     def __hash__(self):
         return hash(self.__key())
@@ -303,7 +302,7 @@ class Edit(Identifier):
 
         return result
 
-    def add_to_aprx(self, edit_rows):
+    def add_to_aprx(self, edit_rows, csv_file: str):
         """Adds the input layer to a .aprx Map based on the owner of the
         data. For example, the UTIL.wFitting feature would be added to the
         "UTIL" map of the designated .aprx file. The file path to the Pro
@@ -312,12 +311,10 @@ class Edit(Identifier):
         Parameters:
         -----------
         edits_rows : list
-            A list of rows represented as dictionaries to be written to
-            the csv file
+            A list of rows represented as dictionaries
+        csv_file : str
+            File path to the csv file containing edited rows
         """
-
-        csv_file = f'.\\facilityid\\log\\{self.feature_name}_Edits.csv'
-        write_to_csv(csv_file, edit_rows)
 
         log.debug("Adding the layer to its edit aprx...")
         aprx = ArcGISProject(config.aprx)
@@ -326,12 +323,25 @@ class Edit(Identifier):
         layer = user_map.listLayers(self.feature_name)[0]
         aprx.save()
 
-        # Move into the group layer, assuming one exists
+        # Create group layer if it does not exist
+        if self.version_name not in [x.name for x in
+                                     user_map.listLayers()]:
+            # Add to the map
+            user_map.addLayer(LayerFile(config.lyr))
+            aprx.save()
+            # Rename the group layer to match the version name
+            layer_name = os.path.basename(config.lyr).strip('.lyrx')
+            for lyr in user_map.listLayers():
+                if lyr.name == layer_name:
+                    lyr.name = self.version_name
+                    break
+
+        # Move into the group layer
         try:
-            group_layer = [x for x in user_map.listLayers()
-                           if x.isGroupLayer][0]
+            group_layer = user_map.listLayers(self.version_name)[0]
             user_map.addLayerToGroup(group_layer, layer)
             user_map.removeLayer(layer)
+            aprx.save()
             layer = user_map.listLayers(self.feature_name)[0]
         except IndexError:
             log.exception(f"No group layer exists in the {self.owner} map...")
@@ -344,7 +354,12 @@ class Edit(Identifier):
 
         records = self._edit()
         if records:
+            log.debug("Writing edited rows to a csv...")
+            csv_file = f'.\\facilityid\\log\\{self.feature_name}_Edits.csv'
+            write_to_csv(csv_file, records)
+
             self.add_edit_metadata(records)
+
             guid_facid = {x['GLOBALID']: x["NEWFACILITYID"] for x in records}
             if connection_file:
                 edit_conn = os.path.join(connection_file, *self.tuple_path[1:])
@@ -379,12 +394,15 @@ class Edit(Identifier):
                               f"{self.feature_name}..."))
                     # Reset the aprx connection to the versioned connection
                     self.aprx_connection = edit_conn
+                    self.version_name = os.path.basename(
+                        connection_file).strip(".sde")
+                    self.add_to_aprx(records, csv_file)
                 except RuntimeError:
                     log.exception(("Could not perform versioned edits "
                                    f"on {self.feature_name}..."))
-            log.debug("Logging edits to csv...")
-            write_to_csv(r'.\\facilityid\\log\\AllEditsEver.csv', records)
-            self.add_to_aprx(records)
+            log.debug("Logging edits to csv file containing all edits ever...")
+            all_edits = r'.\\facilityid\\log\\AllEditsEver.csv'
+            write_to_csv(all_edits, records)
         else:
             log.info("No edits were necessary...")
 
