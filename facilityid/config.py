@@ -14,6 +14,7 @@ with open(r'.\facilityid\config.yaml') as config_file:
 
 # Pro project location
 aprx = config["aprx"]
+lyr = config["template_lyr"]
 
 # Which database?
 db = config["platform"]

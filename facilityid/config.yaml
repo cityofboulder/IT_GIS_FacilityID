@@ -1,5 +1,6 @@
 #ArcGIS Pro project location
 aprx: ".\\.esri\\EditMaps.aprx"
+template_lyr: ".\\.esri\\TemplateGroupLayer.lyrx"
 
 # Database platform: ORACLE or SQLSERVER?
 platform: "ORACLE"
