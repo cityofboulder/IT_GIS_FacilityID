@@ -80,18 +80,10 @@ def main():
     for user in e_users:
         # Step 6a: Post edits or save layer files
         user_versions = {k: v for k, v in versions.items() if user in k}
-        for version, info in user_versions.items():
-            if user in config.post_edits:
-                succeeded = mgmt.reconcile_post(info["parent"], version)
-                if succeeded:
-                    info["posted"] = True
-            else:
-                if user in config.versioned_edits or not info["posted"]:
-                    log.info("Saving layer files...")
-                    mgmt.save_layer_files()
+        mgmt.post_and_save_layer_files(user, user_versions)
 
         # Step 6b: Send an email with results
-        all_files = mgmt.list_files(['.csv.', '.lyrx'])
+        all_files = mgmt.list_files(['.csv', '.lyrx'])
         post = [v["posted"] for v in user_versions.values()]
         body, files = mgmt.email_matter(user, post, all_files)
         mgmt.send_email(body, config.recipients[user], *files)
