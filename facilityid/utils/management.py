@@ -176,22 +176,34 @@ def clear_map_layers():
     aprx.save()
 
 
-def save_layer_files():
-    """Saves layers in every map to a layer file based on user. If a
-    group layer does not exist, it will save an individual layer file
-    for every layer that needs edits. Saved in the .esri folder of the
-    project.
+def save_layer_file(user: str, lyr_file_name: str):
+    """Saves a layer file based on the user and version name.
+
+    Parameters
+    ----------
+    user : str
+        The user whose map contains the specified layer file
+    lyr_file_name : str
+        The name of the layer file that needs to be saved
     """
+
     aprx = ArcGISProject(config.aprx)
-    for map_ in aprx.listMaps():
-        try:
-            layer = [x for x in map_.listLayers() if x.isGroupLayer][0]
-            layer.saveACopy(f".\\.esri\\{map_.name}_FeaturesToEdit.lyrx")
-        except IndexError:
-            log.exception(f"No group layers exist in the {map_.name} map...")
-            layers = [x for x in map_.listLayers() if not x.isBasemapLayer]
-            for l in layers:
-                l.saveACopy(f".\\.esri\\{l.name}.lyrx")
+    user_map = aprx.listMaps(user)[0]
+    lyr = user_map.listLayers(lyr_file_name)
+    lyr.saveACopy(f".\\.esri\\{lyr_file_name}_EditedFeatures.lyrx")
+
+
+def post_and_save_layer_files(user: str, version_info: dict):
+
+    for version, info in version_info.items():
+        if user in config.post_edits:
+            succeeded = reconcile_post(info["parent"], version)
+            if succeeded:
+                info["posted"] = True
+        else:
+            if user in config.versioned_edits or not info["posted"]:
+                log.info(f"Saving layer file for {version}...")
+                save_layer_file(user, version)
 
 
 def write_to_csv(csv_file: str, rows: list):
