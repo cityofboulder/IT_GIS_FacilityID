@@ -13,7 +13,8 @@ def main():
     # Step 1: Delete all existing Facility ID versions and old files
     log.info("Deleting old Facility ID versions...")
     mgmt.delete_facilityid_versions(config.edit)
-    mgmt.list_files(['.sde', '.lyrx', '.csv'], ['AllEditsEver'], True)
+    exclude = ['AllEditsEver', 'GroupLayerTemplate']
+    mgmt.list_files(['.sde', '.lyrx', '.csv'], exclude, True)
 
     # Step 2: Clear layers from all edit maps in Pro
     log.info("Removing layers from maps in the FacilityID Pro project...")
