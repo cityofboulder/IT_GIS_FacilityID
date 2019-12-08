@@ -265,7 +265,8 @@ def list_files(include: list, exclude: list = [], delete: bool = False):
 
 
 def create_html_table(data: list) -> str:
-    """Creates table encoded in HTML
+    """Creates table encoded in HTML, where columns are sorted based on
+    the column names of each dict key.
 
     Parameters
     ----------
@@ -279,13 +280,15 @@ def create_html_table(data: list) -> str:
     """
 
     # Encode headers into HTML
-    headers = "".join([f"<th>{x}</th>" for x in data[0].keys()])
+    sorted_headers = sorted(data[0])
+    headers = "".join([f"<th>{x}</th>" for x in sorted_headers])
     header_row = f"<tr>{headers}</tr>"
 
     # Encode table data
     table_data = ""
     for dict_row in data:
-        row_data = "".join([f"<td>{x}</td>" for x in dict_row.values()])
+        sorted_data = [dict_row[x] for x in sorted_headers]
+        row_data = "".join([f"<td>{x}</td>" for x in sorted_data])
         table_row = f"<tr>{row_data}</tr>"
         table_data += table_row
 
@@ -295,7 +298,8 @@ def create_html_table(data: list) -> str:
     return table
 
 
-def email_matter(user: str, posted_successfully: list, attach_list: list):
+def email_matter(user: str, posted_successfully: list, attach_list: list,
+                 failed_inspection: list, failed_versioning: list):
     """Defines the main body of the email sent at the end of the script,
     and also returns attachments
 
@@ -307,6 +311,10 @@ def email_matter(user: str, posted_successfully: list, attach_list: list):
         A list of bools for whether all versions posted successfully
     attach_list : list
         List of all files that might need to be emailed
+    failed_inspection : list
+        A list of dicts, derived from the Identifier class
+    failed_versioning : list
+        A list of dicts, derived from the Edit class
 
     Returns:
     --------
@@ -321,20 +329,39 @@ def email_matter(user: str, posted_successfully: list, attach_list: list):
     if user in config.versioned_edits:
         if all(posted_successfully):
             insert = ("Versioned edits to Facility IDs have been posted "
-                      "on your behalf. \N{High Voltage Sign} <br><br>")
+                      "on your behalf. \N{High Voltage Sign}")
         else:
             insert = ("Versioned edits were made on your behalf. Any versions "
                       "that were not posted automatically are attached as one "
                       "or more layer files. Open those layer files and "
-                      "reconcile/post the changes. <br><br>")
+                      "reconcile/post the changes.")
             attach = [x for x in attach_list if all(
                 arg in x for arg in [user, '.lyrx'])]
     else:
         insert = ("You have not authorized versioned edits, but your data is "
                   "in need of edits. You can join the attached .csv files to "
-                  "the proper layers and edit any way you see fit. <br><br>")
+                  "the proper layers and edit any way you see fit.")
         attach = [x for x in attach_list if all(
             arg in x for arg in [user, '.csv'])]
+
+    if failed_inspection:
+        user_fail = [x for x in failed_inspection if user in x["0 - Feature"]]
+        insert += ("<br><br>"
+                   "The following features could not be scanned for incorrect "
+                   "Facility IDs. If you restore each feature based on the "
+                   "table below, Facility ID checks will be re-enabled."
+                   "<br><br>",
+                   create_html_table(user_fail))
+
+    if failed_versioning:
+        user_fail = [x for x in failed_versioning if user in x["0 - Feature"]]
+        insert += ("<br><br>"
+                   "The following features could not be edited in a version. "
+                   "If you restore each feature based on the "
+                   "table below, the layer will be eligible for versioned "
+                   "edits."
+                   "<br><br>",
+                   create_html_table(user_fail))
 
     body = f"""\
                 <html>
@@ -343,6 +370,7 @@ def email_matter(user: str, posted_successfully: list, attach_list: list):
                         <p>
                         Dear Human,<br><br>
                         {insert}
+                        <br><br>
                         </p>
                         <p>
                         Beep Boop Beep,<br><br>

@@ -70,7 +70,7 @@ def main():
     # Step 5: Email users that were inspected but did not need edits
     i_users = identify.Identifier.inspected_users  # Users that were inspected
     e_users = edit.Edit.edited_users  # Users that needed edits
-    n_users = list(set(i_users) - set(e_users))  # Inspected users w/ no edits
+    n_users = set(i_users) - set(e_users)  # Inspected users w/ no edits
     for user in n_users:
         body = (f"None of the features owned by {user} required Facility ID "
                 "edits. \N{party popper}")
@@ -83,7 +83,10 @@ def main():
         mgmt.post_and_save_layer_files(user, user_versions)
 
         # Step 6b: Send an email with results
+        scan_fails = identify.Identifier.failures
+        edit_fails = edit.Edit.version_failures
         all_files = mgmt.list_files(['.csv', '.lyrx'])
         post = [v["posted"] for v in user_versions.values()]
-        body, files = mgmt.email_matter(user, post, all_files)
+        body, files = mgmt.email_matter(
+            user, post, all_files, scan_fails, edit_fails)
         mgmt.send_email(body, config.recipients[user], *files)
