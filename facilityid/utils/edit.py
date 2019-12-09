@@ -324,13 +324,15 @@ class Edit(Identifier):
         aprx.save()
 
         # Create group layer if it does not exist
+        lyr_realpath = os.path.realpath(config.lyr)
+        lyr_basename = os.path.basename(config.lyr)
         if self.version_name not in [x.name for x in
                                      user_map.listLayers()]:
             # Add to the map
-            user_map.addLayer(LayerFile(config.lyr))
+            user_map.addLayer(LayerFile(lyr_realpath))
             aprx.save()
             # Rename the group layer to match the version name
-            layer_name = os.path.basename(config.lyr).strip('.lyrx')
+            layer_name = lyr_basename.strip('.lyrx')
             for lyr in user_map.listLayers():
                 if lyr.name == layer_name:
                     lyr.name = self.version_name
