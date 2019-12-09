@@ -337,13 +337,13 @@ def email_matter(user: str, posted_successfully: list, attach_list: list,
                       "attached as one or more layer files. Open those layer "
                       "files and reconcile/post the changes.")
             attach = [x for x in attach_list if all(
-                arg in x for arg in [f"{user}.", '.lyrx'])]
+                arg in x for arg in [user, '.lyrx'])]
     else:
         insert = ("You have not authorized versioned edits, but your data is "
                   "in need of edits. You can join the attached .csv files to "
                   "the proper layers and edit any way you see fit.")
         attach = [x for x in attach_list if all(
-            arg in x for arg in [f"{user}.", '.csv'])]
+            arg in x for arg in [user, '.csv'])]
 
     if failed_inspection:
         user_fail = [x for x in failed_inspection if user in x["0 - Feature"]]
@@ -366,7 +366,7 @@ def email_matter(user: str, posted_successfully: list, attach_list: list,
                    "<br><br>")
         insert += create_html_table(user_fail)
         attach += [x for x in attach_list if all(
-            arg in x for arg in [f"{user}.", '.csv'])]
+            arg in x for arg in [user, '.csv'])]
 
     body = f"""\
                 <html>
