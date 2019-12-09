@@ -144,11 +144,12 @@ class Identifier:
         """
 
         result = False  # Assume the layer will be skipped
-        essentials = {"1 - Enable GLOBALIDs": self.has_globalid,
-                      "2 - Enable Editor Tracking": self.editorTrackingEnabled,
-                      "3 - Give one record an ID": self.prefix}
         if self.has_table:
             if self.has_facilityid:
+                essentials = {"1 - Enable GLOBALIDs": self.has_globalid,
+                              "2 - Enable Editor Tracking":
+                              self.editorTrackingEnabled,
+                              "3 - Give one record an ID": self.prefix}
                 if all(essentials.values()):
                     if self.owner not in self.inspected_users:
                         self.inspected_users.append(self.owner)
