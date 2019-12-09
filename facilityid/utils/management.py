@@ -370,12 +370,27 @@ def email_matter(user: str, posted_successfully: list, attach_list: list,
 
     body = f"""\
                 <html>
-                    <head></head>
+                    <head>
+                        <style>
+                        table {{
+                            border-collapse: collapse;
+                            border: 1px solid;
+                        }}
+
+                        td, th {{
+                            border: 1px solid rgb(190,190,190);
+                            padding: 10px 10px;
+                        }}
+
+                        td {{
+                            text-align: center;
+                        }}
+                        </style>
+                    </head>
                     <body>
                         <p>
                         Dear Human,<br><br>
                         {insert}
-                        <br><br>
                         </p>
                         <p>
                         Beep Boop Beep,<br><br>
