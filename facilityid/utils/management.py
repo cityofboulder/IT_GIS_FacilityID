@@ -189,8 +189,8 @@ def save_layer_file(user: str, lyr_file_name: str):
 
     aprx = ArcGISProject(config.aprx)
     user_map = aprx.listMaps(user)[0]
-    lyr = user_map.listLayers(lyr_file_name)
-    lyr.saveACopy(f".\\.esri\\{lyr_file_name}_EditedFeatures.lyrx")
+    lyr = user_map.listLayers(lyr_file_name)[0]
+    lyr.saveACopy(f".\\.esri\\{lyr_file_name}.lyrx")
 
 
 def post_and_save_layer_files(user: str, version_info: dict):
