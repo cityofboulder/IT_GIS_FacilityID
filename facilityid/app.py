@@ -56,7 +56,7 @@ def main():
                 conn_file = ""
 
             # Step 4e: Perform edits
-            log.info((f"Attempting versioned edits on {editor.feature_name} "
+            log.info((f"Attempting edits on {editor.feature_name} "
                      f"with prefix {editor.prefix}..."))
             editor.edit_version(conn_file)
 
@@ -75,6 +75,7 @@ def main():
         body = (f"None of the features owned by {user} required Facility ID "
                 "edits. \N{party popper}")
         mgmt.send_email(body, config.recipients[user])
+        log.info(f"Email sent to {user} recipients...")
 
     # Step 6: Loop through all users that had edits performed
     for user in e_users:
@@ -90,3 +91,4 @@ def main():
         body, files = mgmt.email_matter(
             user, post, all_files, scan_fails, edit_fails)
         mgmt.send_email(body, config.recipients[user], *files)
+        log.info(f"Email sent to {user} recipients...")
