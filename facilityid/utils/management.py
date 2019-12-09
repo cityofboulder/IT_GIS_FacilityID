@@ -84,11 +84,11 @@ def versioned_connection(parent: str, version_name: str):
     """
 
     conn_file = os.path.join(".\\.esri", f"{version_name}.sde")
+    full_conn_path = os.path.realpath(conn_file)
 
     if os.path.exists(conn_file):
         log.debug(f"{version_name} has already been created...")
     else:
-        full_conn_path = os.path.realpath(conn_file)
         version_owner = "GISSCR"
         full_version_name = f"{version_owner}.{version_name}"
 
