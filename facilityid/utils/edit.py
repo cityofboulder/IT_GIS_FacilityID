@@ -60,11 +60,9 @@ class Edit(Identifier):
     def __hash__(self):
         return hash(self.__key())
 
-    def __eq__(self, other):
-        return self.__key() == other.__key()
-
     def __key(self):
-        key = sorted(self.rows, key=lambda x: x['GLOBALID'])
+        guid_facid_pairs = [(x['GLOBALID'], _merge(x)) for x in self.rows]
+        key = tuple(sorted(guid_facid_pairs, key=lambda y: y[0]))
         return key
 
     def add_edit_metadata(self, edit_rows):
@@ -416,7 +414,7 @@ class Edit(Identifier):
         try:
             with shelve.open('.\\facilityid\\log\\previous_run', 'c') as db:
                 previous = db[self.feature_name]
-            if self.__key() == previous:
+            if hash(self) == hash(previous):
                 return True
             else:
                 return False
