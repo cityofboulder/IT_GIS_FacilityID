@@ -327,22 +327,23 @@ def email_matter(user: str, posted_successfully: list, attach_list: list,
 
     attach = []
     if user in config.versioned_edits:
-        if all(posted_successfully):
-            insert = ("Versioned edits to Facility IDs have been posted "
-                      "on your behalf. \N{High Voltage Sign}")
+        if posted_successfully and all(posted_successfully):
+            insert = ("Versioned edits to Facility IDs "
+                      "have been posted on your behalf."
+                      "\N{Fire} \N{Fire} \N{Fire}")
         else:
-            insert = ("Versioned edits were made on your behalf. Any versions "
-                      "that were not posted automatically are attached as one "
-                      "or more layer files. Open those layer files and "
-                      "reconcile/post the changes.")
+            insert = ("Versioned edits were attempted on your behalf. Any "
+                      "versions that were not posted automatically are "
+                      "attached as one or more layer files. Open those layer "
+                      "files and reconcile/post the changes.")
             attach = [x for x in attach_list if all(
-                arg in x for arg in [user, '.lyrx'])]
+                arg in x for arg in [f"{user}.", '.lyrx'])]
     else:
         insert = ("You have not authorized versioned edits, but your data is "
                   "in need of edits. You can join the attached .csv files to "
                   "the proper layers and edit any way you see fit.")
         attach = [x for x in attach_list if all(
-            arg in x for arg in [user, '.csv'])]
+            arg in x for arg in [f"{user}.", '.csv'])]
 
     if failed_inspection:
         user_fail = [x for x in failed_inspection if user in x["0 - Feature"]]
@@ -350,8 +351,8 @@ def email_matter(user: str, posted_successfully: list, attach_list: list,
                    "The following features could not be scanned for incorrect "
                    "Facility IDs. If you restore each feature based on the "
                    "table below, Facility ID checks will be re-enabled."
-                   "<br><br>",
-                   create_html_table(user_fail))
+                   "<br><br>")
+        insert += create_html_table(user_fail)
 
     if failed_versioning:
         user_fail = [x for x in failed_versioning if user in x["0 - Feature"]]
@@ -359,9 +360,13 @@ def email_matter(user: str, posted_successfully: list, attach_list: list,
                    "The following features could not be edited in a version. "
                    "If you restore each feature based on the "
                    "table below, the layer will be eligible for versioned "
-                   "edits."
-                   "<br><br>",
-                   create_html_table(user_fail))
+                   "edits. In the meantime, you can perform edits on these "
+                   "features by joining the attached .csv files to their "
+                   "proper layers."
+                   "<br><br>")
+        insert += create_html_table(user_fail)
+        attach += [x for x in attach_list if all(
+            arg in x for arg in [f"{user}.", '.csv'])]
 
     body = f"""\
                 <html>
@@ -391,7 +396,7 @@ def send_email(body: str, recipients: list, *attachments):
     msg = MIMEMultipart('alternative')
     msg['From'] = sender
     msg['To'] = "; ".join(recipients)
-    msg['Subject'] = "Facility ID"
+    msg['Subject'] = "\N{High Voltage Sign} Facility ID \N{High Voltage Sign}"
 
     if attachments:
         for item in attachments:
