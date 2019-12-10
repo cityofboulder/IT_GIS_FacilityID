@@ -241,6 +241,7 @@ class Edit(Identifier):
                 for c in chunk[:-1]:
                     # Count how many duplicates were QC'd
                     self.count["3 - # Duplicated IDs"] += 1
+
                     edit_row = self.rows[self.rows.index(c)]
                     new_id = self._new_id()
                     edit_row["FACILITYID"]["int_id"] = new_id
@@ -285,7 +286,7 @@ class Edit(Identifier):
                 # Count whether the ID is incorrect...
                 # (if edits are required but the ID was not empy)
                 if not empty:
-                    self.count["2 -  # Incorrect IDs"] += 1
+                    self.count["2 - # Incorrect IDs"] += 1
 
                 r = self._format_edit_row(edit_row, old_facid)
                 edited.append(r)
