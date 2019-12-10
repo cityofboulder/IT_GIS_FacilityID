@@ -17,7 +17,7 @@ authorization:
     versioned_edits: True
     post_edits: False
   PARKS:
-    versioned_edits: True
+    versioned_edits: False
     post_edits: False
 
 # Will edits all come from a single parent or multiple parents?
