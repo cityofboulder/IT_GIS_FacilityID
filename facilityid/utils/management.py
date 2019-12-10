@@ -349,35 +349,38 @@ def email_matter(user: str, posted_successfully: list, attach_list: list,
         attach = [x for x in attach_list if all(
             arg in x for arg in [user, '.csv'])]
 
-    user_counts = [x for x in counts if user in x["0 - Feature"]]
-    if user_counts:
-        insert += ("<br><br>"
-                   f"Here is a breakdown of edits performed on {user} layers:"
-                   "<br><br>")
-        insert += create_html_table(user_counts)
+    if counts:
+        user_counts = [x for x in counts if user in x["0 - Feature"]]
+        if user_counts:
+            insert += ("<br><br>"
+                       f"Here is a breakdown of edits performed on {user} "
+                       "layers:"
+                       "<br><br>")
+            insert += create_html_table(user_counts)
 
-    user_fail = [x for x in failed_inspection if user in x["0 - Feature"]]
-    if user_fail:
-        insert += ("<br><br>"
-                   "The following features could not be scanned for incorrect "
-                   "Facility IDs. If you restore each feature based on the "
-                   "table below, Facility ID checks will be re-enabled."
-                   "<br><br>")
-        insert += create_html_table(user_fail)
+    if failed_inspection:
+        user_fail = [x for x in failed_inspection if user in x["0 - Feature"]]
+        if user_fail:
+            insert += ("<br><br>"
+                       "The following features could not be scanned for "
+                       "incorrect Facility IDs. If you restore each feature "
+                       "based on the table below, Facility ID checks will be "
+                       "re-enabled."
+                       "<br><br>")
+            insert += create_html_table(user_fail)
 
-    user_fail_vers = [x for x in failed_versioning if user in x["0 - Feature"]]
-    if user_fail_vers:
-        insert += ("<br><br>"
-                   "The following features could not be edited in a version. "
-                   "If you restore each feature based on the "
-                   "table below, the layer will be eligible for versioned "
-                   "edits. In the meantime, you can perform edits on these "
-                   "features by joining the attached .csv files to their "
-                   "proper layers."
-                   "<br><br>")
-        insert += create_html_table(user_fail_vers)
-        attach += [x for x in attach_list if all(
-            arg in x for arg in [user, '.csv'])]
+    if failed_versioning:
+        user_fail = [x for x in failed_versioning if user in x["0 - Feature"]]
+        if user_fail:
+            insert += ("<br><br>"
+                       "The following features could not be edited in a "
+                       "version. If you restore each feature based on the "
+                       "table below, the layer will be eligible for versioned "
+                       "edits."
+                       "<br><br>")
+            insert += create_html_table(user_fail)
+            attach += [x for x in attach_list if all(
+                arg in x for arg in [user, '.csv'])]
 
     body = f"""\
                 <html>
