@@ -219,7 +219,8 @@ class Edit(Identifier):
         self.count = {"0 - Feature": self.feature_name,
                       "1 - # Empty IDs": 0,
                       "2 - # Incorrect IDs": 0,
-                      "3 - # Duplicated IDs": 0}
+                      "3 - # Duplicated IDs": 0,
+                      "4 - Total Edits": 0}
 
         edited = list()
         if self.duplicates:
@@ -278,10 +279,14 @@ class Edit(Identifier):
                 edits = True
 
             if edits:
+                # Count total # of edits
+                self.count["4 - Total Edits"] += 1
+
                 # Count whether the ID is incorrect...
                 # (if edits are required but the ID was not empy)
                 if not empty:
                     self.count["2 -  # Incorrect IDs"] += 1
+
                 r = self._format_edit_row(edit_row, old_facid)
                 edited.append(r)
 
