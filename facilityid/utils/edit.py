@@ -47,7 +47,7 @@ class Edit(Identifier):
     """
 
     edited_users = list()  # Data owners that had edits performed
-    edited_features = dict()  # {"FeatureName1": total edit count, ...}
+    edited_features = list()  # Counts of edits required for each layer
     version_failures = list()  # Layers that can't have versioned edits done
 
     def __init__(self, tuple_path):
@@ -65,8 +65,8 @@ class Edit(Identifier):
         key = tuple(sorted(guid_facid_pairs, key=lambda y: y[0]))
         return key
 
-    def add_edit_metadata(self, edit_rows):
-        self.edited_features[self.feature_name] = len(edit_rows)
+    def add_edit_metadata(self):
+        self.edited_features.append(self.count)
         if self.owner not in self.edited_users:
             self.edited_users.append(self.owner)
 
@@ -215,6 +215,12 @@ class Edit(Identifier):
             had its FACILITYID changed.
         """
 
+        # Initialize a dict that will count the kinds of edits required
+        self.count = {"0 - Feature": self.feature_name,
+                      "1 - # Empty IDs": 0,
+                      "2 - # Incorrect IDs": 0,
+                      "3 - # Duplicated IDs": 0}
+
         edited = list()
         if self.duplicates:
             log.debug("Identifying duplicated Facility IDs...")
@@ -232,6 +238,8 @@ class Edit(Identifier):
                 # The last ID of the list (e.g. 'chunk[-1]'), does not need to
                 # be edited, since all of its dupes have been replaced
                 for c in chunk[:-1]:
+                    # Count how many duplicates were QC'd
+                    self.count["3 - # Duplicated IDs"] += 1
                     edit_row = self.rows[self.rows.index(c)]
                     new_id = self._new_id()
                     edit_row["FACILITYID"]["int_id"] = new_id
@@ -250,6 +258,11 @@ class Edit(Identifier):
             pfix = edit_row["FACILITYID"]["prefix"]
             str_id = edit_row["FACILITYID"]["str_id"]
             # int_id = edit_row["FACILITYID"]["int_id"]
+            empty = not pfix and not str_id
+
+            # Count whether the ID is empty
+            if empty:
+                self.count["1 - # Empty IDs"] += 1
 
             # PREFIX EDITS
             if not pfix or not pfix.isupper() or pfix != self.prefix:
@@ -265,6 +278,10 @@ class Edit(Identifier):
                 edits = True
 
             if edits:
+                # Count whether the ID is incorrect...
+                # (if edits are required but the ID was not empy)
+                if not empty:
+                    self.count["2 -  # Incorrect IDs"] += 1
                 r = self._format_edit_row(edit_row, old_facid)
                 edited.append(r)
 
@@ -358,7 +375,7 @@ class Edit(Identifier):
             csv_file = f'.\\facilityid\\log\\{self.feature_name}_Edits.csv'
             write_to_csv(csv_file, records)
 
-            self.add_edit_metadata(records)
+            self.add_edit_metadata()
 
             guid_facid = {x['GLOBALID']: x["NEWFACILITYID"] for x in records}
             if connection_file:
