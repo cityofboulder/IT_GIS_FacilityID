@@ -160,6 +160,9 @@ class Identifier:
                     for k, v in essentials.items():
                         wrong = {**wrong, k: "X" if not v else ""}
                     self.failures.append(wrong)
+                    log.warning(f"{self.feature_name} is being skipped "
+                                "because it is missing an essential "
+                                "requirement for the script to run...")
             else:
                 log.warning((f"{self.feature_name}  does not have a "
                              "FACILITYID field..."))
