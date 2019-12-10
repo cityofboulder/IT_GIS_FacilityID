@@ -172,7 +172,6 @@ class Identifier:
 
     def duplicates(self):
         # Initialize an executor object for SDE
-        log.info(f"Examining {self.feature_name} for duplicated values...")
         execute_object = ArcSDESQLExecute(self.connection)
         query = f"""SELECT a.GLOBALID,
                            a.FACILITYID
@@ -190,6 +189,7 @@ class Identifier:
             globalids = [r[1] for r in result if r[0]]
             return globalids
         except (ExecuteError, TypeError, AttributeError):
+            # TODO: Add logging
             return list()
 
     def rows(self):
