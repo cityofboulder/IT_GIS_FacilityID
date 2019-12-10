@@ -78,17 +78,18 @@ def main():
         log.info(f"Email sent to {user} recipients...")
 
     # Step 6: Loop through all users that had edits performed
+    scan_fails = identify.Identifier.failures
+    edit_fails = edit.Edit.version_failures
+    edit_counts = edit.Edit.edited_features
+    all_files = mgmt.list_files(['.csv', '.lyrx'])
     for user in e_users:
         # Step 6a: Post edits or save layer files
         user_versions = {k: v for k, v in versions.items() if user in k}
         mgmt.post_and_save_layer_files(user, user_versions)
 
         # Step 6b: Send an email with results
-        scan_fails = identify.Identifier.failures
-        edit_fails = edit.Edit.version_failures
-        all_files = mgmt.list_files(['.csv', '.lyrx'])
         post = [v["posted"] for v in user_versions.values()]
         body, files = mgmt.email_matter(
-            user, post, all_files, scan_fails, edit_fails)
+            user, post, all_files, scan_fails, edit_fails, edit_counts)
         mgmt.send_email(body, config.recipients[user], *files)
         log.info(f"Email sent to {user} recipients...")

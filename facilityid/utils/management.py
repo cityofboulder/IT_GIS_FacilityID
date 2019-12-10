@@ -299,7 +299,8 @@ def create_html_table(data: list) -> str:
 
 
 def email_matter(user: str, posted_successfully: list, attach_list: list,
-                 failed_inspection: list, failed_versioning: list):
+                 failed_inspection: list, failed_versioning: list,
+                 counts: list):
     """Defines the main body of the email sent at the end of the script,
     and also returns attachments
 
@@ -315,6 +316,9 @@ def email_matter(user: str, posted_successfully: list, attach_list: list,
         A list of dicts, derived from the Identifier class
     failed_versioning : list
         A list of dicts, derived from the Edit class
+    counts : list
+        A list of dicts, derived from the Edit class, detailing number
+        of edits performed on any layer that was edited
 
     Returns:
     --------
@@ -339,14 +343,21 @@ def email_matter(user: str, posted_successfully: list, attach_list: list,
             attach = [x for x in attach_list if all(
                 arg in x for arg in [user, '.lyrx'])]
     else:
-        insert = ("You have not authorized versioned edits, but your data is "
-                  "in need of edits. You can join the attached .csv files to "
-                  "the proper layers and edit any way you see fit.")
+        insert = ("You have not authorized versioned edits, but your data had "
+                  "irregular Facility IDs. Use the attached csv files to edit "
+                  "your data.")
         attach = [x for x in attach_list if all(
             arg in x for arg in [user, '.csv'])]
 
-    if failed_inspection:
-        user_fail = [x for x in failed_inspection if user in x["0 - Feature"]]
+    user_counts = [x for x in counts if user in x["0 - Feature"]]
+    if user_counts:
+        insert += ("<br><br>"
+                   f"Here is a breakdown of edits performed on {user} layers:"
+                   "<br><br>")
+        insert += create_html_table(user_counts)
+
+    user_fail = [x for x in failed_inspection if user in x["0 - Feature"]]
+    if user_fail:
         insert += ("<br><br>"
                    "The following features could not be scanned for incorrect "
                    "Facility IDs. If you restore each feature based on the "
@@ -354,8 +365,8 @@ def email_matter(user: str, posted_successfully: list, attach_list: list,
                    "<br><br>")
         insert += create_html_table(user_fail)
 
-    if failed_versioning:
-        user_fail = [x for x in failed_versioning if user in x["0 - Feature"]]
+    user_fail_vers = [x for x in failed_versioning if user in x["0 - Feature"]]
+    if user_fail_vers:
         insert += ("<br><br>"
                    "The following features could not be edited in a version. "
                    "If you restore each feature based on the "
@@ -364,7 +375,7 @@ def email_matter(user: str, posted_successfully: list, attach_list: list,
                    "features by joining the attached .csv files to their "
                    "proper layers."
                    "<br><br>")
-        insert += create_html_table(user_fail)
+        insert += create_html_table(user_fail_vers)
         attach += [x for x in attach_list if all(
             arg in x for arg in [user, '.csv'])]
 
