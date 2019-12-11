@@ -233,8 +233,9 @@ class Edit(Identifier):
                 # The last ID of the list (e.g. 'chunk[-1]'), does not need to
                 # be edited, since all of its dupes have been replaced
                 for c in chunk[:-1]:
-                    # Count how many duplicates were QC'd
+                    # Count how many duplicates were QC'd, and add to total
                     self.count["3 - # Duplicated IDs"] += 1
+                    self.count["4 - Total Edits"] += 1
 
                     edit_row = self.rows[self.rows.index(c)]
                     new_id = self._new_id()
