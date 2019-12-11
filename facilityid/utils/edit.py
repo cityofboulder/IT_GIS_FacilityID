@@ -32,13 +32,6 @@ class Edit(Identifier):
         table
     duplicates : list
         A list of GLOBALIDs that have duplicated FACILITYIDs
-    prefix : str
-        The correct prefix for the layer
-    geom_type : str
-        The type of geometry being evaluated. None if evaluating a table
-
-    Attributes
-    ----------
     used : list
         A reverse sorted list of used IDs in the table
     unused : list
@@ -161,6 +154,7 @@ class Edit(Identifier):
         # Define date to replace Null values in the sort
         # Null values first, followed byt oldest to newest
         _null_date = datetime(1400, 1, 1)
+        geo = self.shapeType if self.datasetType == 'FeatureClass' else ''
 
         def geom_sorter(g):
             """Determines the proper field to sort on based
@@ -174,7 +168,7 @@ class Edit(Identifier):
                 return (x['CREATED_DATE'] or _null_date)
 
         sort_1 = _merge(x)
-        sort_2 = geom_sorter(self.geom_type)
+        sort_2 = geom_sorter(geo)
         sort_3 = (x['LAST_EDITED_DATE'] or _null_date)
 
         return (sort_1, sort_2, sort_3)
