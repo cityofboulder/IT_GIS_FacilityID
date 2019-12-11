@@ -118,7 +118,7 @@ class Identifier:
             result = list()
         return result
 
-    def record_count(self) -> bool:
+    def record_count(self) -> int:
         """Determines if there are any records in the feature class to
         analyze."""
         execute_object = ArcSDESQLExecute(self.connection)
@@ -128,7 +128,7 @@ class Identifier:
             return int(result)
         except ExecuteError:
             # TODO: Add info logging
-            return None
+            return 0
 
     def essentials(self) -> bool:
         """Tests whether the feature is eligible for a Facility ID scan.
@@ -149,7 +149,8 @@ class Identifier:
                 essentials = {"1 - Enable GLOBALIDs": self.has_globalid,
                               "2 - Enable Editor Tracking":
                               self.editorTrackingEnabled,
-                              "3 - Give one record an ID": self.prefix}
+                              "3 - Give one record an ID":
+                              self.prefix and self.record_count() > 0}
                 if all(essentials.values()):
                     if self.owner not in self.inspected_users:
                         self.inspected_users.append(self.owner)
