@@ -340,14 +340,12 @@ def email_matter(user: str, posted_successfully: list, attach_list: list,
                       "versions that were not posted automatically are "
                       "attached as one or more layer files. Open those layer "
                       "files and reconcile/post the changes.")
-            attach = [x for x in attach_list if all(
-                arg in x for arg in [user, '.lyrx'])]
+            attach = [x for x in attach_list if user in x and '.lyrx' in x]
     else:
         insert = ("You have not authorized versioned edits, but your data had "
                   "irregular Facility IDs. Use the attached csv files to edit "
                   "your data.")
-        attach = [x for x in attach_list if all(
-            arg in x for arg in [user, '.csv'])]
+        attach = [x for x in attach_list if user in x and '.csv' in x]
 
     if counts:
         user_counts = [x for x in counts if user in x["0 - Feature"]]
@@ -379,8 +377,7 @@ def email_matter(user: str, posted_successfully: list, attach_list: list,
                        "edits."
                        "<br><br>")
             insert += create_html_table(user_fail)
-            attach += [x for x in attach_list if all(
-                arg in x for arg in [user, '.csv'])]
+            attach += [x for x in attach_list if user in x and '.csv' in x]
 
     body = f"""\
                 <html>
@@ -394,6 +391,7 @@ def email_matter(user: str, posted_successfully: list, attach_list: list,
                         td, th {{
                             border: 1px solid rgb(190,190,190);
                             padding: 10px 10px;
+                            letter-spacing: 0.7px;
                         }}
 
                         td {{
