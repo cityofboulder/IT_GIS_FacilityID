@@ -185,11 +185,11 @@ class Identifier:
                         GROUP BY FACILITYID
                         HAVING COUNT(*) > 1
                     ) dups
-                    ON dups.FACILITYID = a.FACILITYID;"""
+                    ON dups.FACILITYID = a.FACILITYID"""
 
         try:
             result = execute_object.execute(query)
-            globalids = [r[1] for r in result if r[0]]
+            globalids = [r[0] for r in result if r[1]]
             return globalids
         except (ExecuteError, TypeError, AttributeError):
             # TODO: Add logging
