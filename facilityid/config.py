@@ -26,6 +26,7 @@ edit = database["connections"]["edit"]
 
 # Database properties
 db_params = database["info"]
+db_creds = database["credentials"]
 
 # Data owners that authorize versioned edits
 versioned_edits = [

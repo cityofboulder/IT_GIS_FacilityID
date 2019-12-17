@@ -2,7 +2,7 @@
 aprx: ".\\.esri\\EditMaps.aprx"
 template_lyr: ".\\.esri\\GroupLayerTemplate.lyrx"
 
-# Database platform: ORACLE or SQLSERVER?
+# Database platform: ORACLE or SQL_SERVER?
 platform: "ORACLE"
 
 # Which users authorize versioned edits and post control?
@@ -113,6 +113,9 @@ LOGGING:
 # Database configurations
 DATABASES:
   ORACLE:
+    credentials:
+      key: # key goes here
+      token: # token goes here
     connections:
       read: "S:\\GIS\\Share\\DatabaseConnections\\gis on gisprod2.sde"
       edit: "S:\\PW\\PWShare\\GIS\\Scripts\\dbconnections\\gisscr on gisprod2.sde"
@@ -121,17 +124,18 @@ DATABASES:
       instance: "gisprod2"
       account_authentication: "DATABASE_AUTH"
       username: "gisscr"
-      password: "gKJTZkCYS937"
       version_type: "TRANSACTIONAL"
-  SQLSERVER:
+  SQL_SERVER:
+    credentials:
+      key: # key goes here
+      token: # token goes here
     connections:
       read: "S:\\GIS\\Share\\DatabaseConnections\\SQLGISProd3\\gis on gisprod3.sde"
       edit: "S:\\GIS\\Share\\DatabaseConnections\\SQLGISProd3\\gisscr on gisprod3.sde"
     info:
       database_platform: "SQL_SERVER"
-      instance: "sqlprod19gis"
+      instance: "GISData"
       database: "gisprod3"
       account_authentication: "DATABASE_AUTH"
       username: "gisscr"
-      password: ""
       version_type: "TRANSACTIONAL"
