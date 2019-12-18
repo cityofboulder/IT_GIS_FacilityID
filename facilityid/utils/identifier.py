@@ -93,16 +93,23 @@ class Identifier:
         if self.has_facilityid:
             # Initialize an executor object for SDE
             execute_object = ArcSDESQLExecute(self.connection)
-            query = f"""SELECT REGEXP_SUBSTR(FACILITYID, '^[a-zA-Z]+') as PREFIXES,
-                    COUNT(*) as PFIXCOUNT
-                    FROM {self.database_name}
-                    GROUP BY REGEXP_SUBSTR(FACILITYID, '^[a-zA-Z]+')
-                    ORDER BY PFIXCOUNT DESC
-                    FETCH FIRST ROW ONLY"""
+            if self.database == 'ORACLE':
+                query = f"""SELECT REGEXP_SUBSTR(FACILITYID, '^[a-zA-Z]+') as PREFIXES,
+                            COUNT(*) as PFIXCOUNT
+                            FROM {self.database_name}
+                            GROUP BY REGEXP_SUBSTR(FACILITYID, '^[a-zA-Z]+')
+                            ORDER BY PFIXCOUNT DESC
+                            FETCH FIRST ROW ONLY """
+            else:
+                query = f"""SELECT TOP 1 SUBSTRING(FACILITYID, 0, PATINDEX('%[^a-zA-Z]%', FACILITYID)),
+                            COUNT(*)
+                            FROM {self.database_name}
+                            GROUP BY SUBSTRING(FACILITYID, 0, PATINDEX('%[^a-zA-Z]%', FACILITYID))
+                            ORDER BY COUNT(*) DESC"""
             try:
                 result = execute_object.execute(query)
                 return result[0][0]
-            except (ExecuteError, TypeError, AttributeError):
+            except ExecuteError:
                 return None
         else:
             return None
