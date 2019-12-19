@@ -94,18 +94,21 @@ class Identifier:
             # Initialize an executor object for SDE
             execute_object = ArcSDESQLExecute(self.connection)
             if self.database == 'ORACLE':
-                query = f"""SELECT REGEXP_SUBSTR(FACILITYID, '^[a-zA-Z]+') as PREFIXES,
-                            COUNT(*) as PFIXCOUNT
-                            FROM {self.database_name}
-                            GROUP BY REGEXP_SUBSTR(FACILITYID, '^[a-zA-Z]+')
-                            ORDER BY PFIXCOUNT DESC
-                            FETCH FIRST ROW ONLY """
+                query = ("SELECT REGEXP_SUBSTR(FACILITYID, '^[a-zA-Z]+') as "
+                         "PREFIXES, "
+                         "COUNT(*) as PFIXCOUNT "
+                         f"FROM {self.database_name} "
+                         "GROUP BY REGEXP_SUBSTR(FACILITYID, '^[a-zA-Z]+') "
+                         "ORDER BY PFIXCOUNT DESC "
+                         "FETCH FIRST ROW ONLY")
             else:
-                query = f"""SELECT TOP 1 SUBSTRING(FACILITYID, 0, PATINDEX('%[^a-zA-Z]%', FACILITYID)),
-                            COUNT(*)
-                            FROM {self.database_name}
-                            GROUP BY SUBSTRING(FACILITYID, 0, PATINDEX('%[^a-zA-Z]%', FACILITYID))
-                            ORDER BY COUNT(*) DESC"""
+                query = ("SELECT TOP 1 SUBSTRING(FACILITYID, 0, "
+                         "PATINDEX('%[^a-zA-Z]%', FACILITYID)), "
+                         "COUNT(*) "
+                         f"FROM {self.database_name} "
+                         "GROUP BY SUBSTRING(FACILITYID, 0, "
+                         "PATINDEX('%[^a-zA-Z]%', FACILITYID)) "
+                         "ORDER BY COUNT(*) DESC")
             try:
                 result = execute_object.execute(query)
                 return result[0][0]
@@ -271,10 +274,22 @@ class Identifier:
         :param connection: File path to an SDE connection with the GISSCR user
         :return: Boolean
         """
-        query = f"""SELECT PRIVILEGE
-                   FROM ALL_TAB_PRIVS
-                   WHERE TABLE_NAME = '{self.name.upper()}'
-                   AND TABLE_SCHEMA = '{self.owner.upper()}'"""
+
+        if self.database == 'ORACLE':
+            query = f"""SELECT PRIVILEGE
+                        FROM ALL_TAB_PRIVS
+                        WHERE TABLE_NAME = '{self.name.upper()}'
+                        AND TABLE_SCHEMA = '{self.owner.upper()}'"""
+        else:
+            query = ("SELECT PERMISSION_NAME AS PermissionGranted, "
+                     "OBJECT_SCHEMA_NAME(major_id) AS Owner, "
+                     "OBJECT_NAME(major_id) AS TableName "
+                     "FROM sys.database_permissions AS DP "
+                     "INNER JOIN sys.database_principals AS P ON "
+                     "P.principal_id = DP.grantee_principal_id "
+                     "WHERE P.name='gisscr' "
+                     "AND state='G' "
+                     f"AND OBJECT_NAME(major_id) LIKE '{self.name}'")
         execute_object = ArcSDESQLExecute(connection)
         result = execute_object.execute(query)
         editable = False  # Assume GISSCR user cannot edit by default
@@ -285,4 +300,5 @@ class Identifier:
                     break
         except TypeError:
             pass  # result = True when the table cannot be accessed by GISSCR
+
         return editable
