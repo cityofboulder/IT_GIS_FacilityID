@@ -89,7 +89,7 @@ LOGGING:
       fromaddr: "noreply@bouldercolorado.gov"
       toaddrs: ["nestj1@bouldercolorado.gov"]
       subject: "An error halted the FacilityID script"
-      credentials: ["nestlerj@bouldercolorado.gov", "brandish.cohesion.sunbeam"]
+      credentials: ["noreply@bouldercolorado.gov", "password"]
       secure: []
       level: ERROR
       formatter: only
