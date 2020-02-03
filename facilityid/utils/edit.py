@@ -161,15 +161,15 @@ class Edit(Identifier):
             on the spatial data type."""
 
             if g == 'Polygon':
-                return - x['SHAPE@'].area
+                return x['SHAPE@'].area
             elif g == 'Polyline':
-                return - x['SHAPE@'].length
+                return x['SHAPE@'].length
             else:
-                return (x[self.createdAtFieldName] or _null_date)
+                return -(x[self.createdAtFieldName] or _null_date).timestamp()
 
         sort_1 = _merge(x)
-        sort_2 = geom_sorter(geo)
-        sort_3 = (x[self.editedAtFieldName] or _null_date)
+        sort_2 = -(x[self.editedAtFieldName] or _null_date).timestamp()
+        sort_3 = geom_sorter(geo)
 
         return (sort_1, sort_2, sort_3)
 
