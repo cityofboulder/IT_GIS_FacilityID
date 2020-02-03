@@ -3,7 +3,7 @@ aprx: ".\\.esri\\EditMaps.aprx"
 template_lyr: ".\\.esri\\GroupLayerTemplate.lyrx"
 
 # Database platform: ORACLE or SQL_SERVER?
-platform: "ORACLE"
+platform: "SQL_SERVER"
 
 # Which users authorize versioned edits and post control?
 authorization:
@@ -89,7 +89,7 @@ LOGGING:
       fromaddr: "noreply@bouldercolorado.gov"
       toaddrs: ["nestj1@bouldercolorado.gov"]
       subject: "An error halted the FacilityID script"
-      credentials: ["noreply@bouldercolorado.gov", "3qIjkh1)vU"]
+      credentials: ["noreply@bouldercolorado.gov", "password"]
       secure: []
       level: ERROR
       formatter: only
@@ -114,8 +114,8 @@ LOGGING:
 DATABASES:
   ORACLE:
     credentials:
-      key: # key goes here
-      token: # token goes here
+      key: "ZYrwjLqMyDmzvQpi0fcFFsSw2LBGcYe3HJGhV6Z0lLw=SasdsSdddF"
+      token: "gAAAAABd-PlBpAF_QwlkCCxUDz889g8jtVdSE_v5LfjwkZbgG40Xvhv_hTSERhATHkokyV-eClUf7rwMQGCqYkxdmbcClzsEVQ=="
     connections:
       read: "S:\\GIS\\Share\\DatabaseConnections\\gis on gisprod2.sde"
       edit: "S:\\PW\\PWShare\\GIS\\Scripts\\dbconnections\\gisscr on gisprod2.sde"
@@ -127,8 +127,8 @@ DATABASES:
       version_type: "TRANSACTIONAL"
   SQL_SERVER:
     credentials:
-      key: # key goes here
-      token: # token goes here
+      key: "ZYrwjLqMyDmzvQpi0fcFFsSw2LBGcYe3HJGhV6Z0lLw=SasdsSdddF"
+      token: "gAAAAABd9_C3ycfA2Dg5RYUWO3LobnHRNqkIZrKnn5c9QrBEBrRqQra9hl2eFJTTSHRf2z7iuU7Ij8bSsPA1IzE08Be0zozwjYsjL61bHhBnudw9Hm7DxOM="
     connections:
       read: "S:\\GIS\\Share\\DatabaseConnections\\SQLGISProd3\\gis on gisprod3.sde"
       edit: "S:\\GIS\\Share\\DatabaseConnections\\SQLGISProd3\\gisscr on gisprod3.sde"

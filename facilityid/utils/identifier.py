@@ -175,7 +175,7 @@ class Identifier:
                                 "because it is missing an essential "
                                 "requirement for the script to run...")
             else:
-                log.warning((f"{self.feature_name}  does not have a "
+                log.warning((f"{self.feature_name} does not have a "
                              "FACILITYID field..."))
         else:
             log.warning((f"{self.feature_name} does not qualify for "
