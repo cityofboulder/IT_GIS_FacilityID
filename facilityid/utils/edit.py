@@ -3,7 +3,7 @@ import shelve
 from datetime import date, datetime
 
 import facilityid.config as config
-from arcpy import AddJoin_management, ClearWorkspaceCache_management
+from arcpy import ClearWorkspaceCache_management
 from arcpy.da import Editor, UpdateCursor
 from arcpy.mp import ArcGISProject, LayerFile
 
@@ -318,18 +318,11 @@ class Edit(Identifier):
 
         return result
 
-    def add_to_aprx(self, edit_rows, csv_file: str):
+    def add_to_aprx(self):
         """Adds the input layer to a .aprx Map based on the owner of the
         data. For example, the UTIL.wFitting feature would be added to the
         "UTIL" map of the designated .aprx file. The file path to the Pro
         project is set in the config file.
-
-        Parameters:
-        -----------
-        edits_rows : list
-            A list of rows represented as dictionaries
-        csv_file : str
-            File path to the csv file containing edited rows
         """
 
         log.debug("Adding the layer to its edit aprx...")
@@ -366,10 +359,6 @@ class Edit(Identifier):
             layer = user_map.listLayers(self.feature_name)[0]
         except IndexError:
             log.exception(f"No group layer exists in the {self.owner} map...")
-
-        log.debug("Joining csv file to the layer in Pro...")
-        AddJoin_management(layer, "GLOBALID", csv_file, "GLOBALID")
-        aprx.save()
 
     def edit_version(self, connection_file: str):
 
@@ -417,7 +406,7 @@ class Edit(Identifier):
                     self.aprx_connection = edit_conn
                     self.version_name = os.path.basename(
                         connection_file).strip(".sde")
-                    self.add_to_aprx(records, csv_file)
+                    self.add_to_aprx()
                 except RuntimeError:
                     log.exception(("Could not perform versioned edits "
                                    f"on {self.feature_name}..."))
