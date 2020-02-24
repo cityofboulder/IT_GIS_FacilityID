@@ -336,7 +336,10 @@ class Edit(Identifier):
         aprx = ArcGISProject(config.aprx)
         user_map = aprx.listMaps(f"{self.owner}")[0]
         user_map.addDataFromPath(self.aprx_connection)
-        layer = user_map.listLayers(self.feature_name)[0]
+        for l in user_map.listLayers():
+            if self.feature_name in l.dataSource:
+                layer = l
+                break
         aprx.save()
 
         # Create group layer if it does not exist
