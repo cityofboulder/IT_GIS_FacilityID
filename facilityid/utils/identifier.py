@@ -81,6 +81,9 @@ class Identifier:
                 name = ".".join([self.owner, self.name[:26]]).upper() + "_EVW"
             else:
                 name = ".".join([self.owner, self.name[:30]]).upper()
+        else:
+            if self.isVersioned:
+                name += "_EVW"
 
         return name
 
