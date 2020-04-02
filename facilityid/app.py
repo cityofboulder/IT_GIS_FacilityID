@@ -67,29 +67,23 @@ def main():
             # Step 4g: Delete object instances from memory
             del editor, facilityid
 
-    # Step 5: Email users that were inspected but did not need edits
-    i_users = identify.Identifier.inspected_users  # Users that were inspected
+    # Step 5: Loop through all users that had edits performed
     e_users = edit.Edit.edited_users  # Users that needed edits
-    n_users = set(i_users) - set(e_users)  # Inspected users w/ no edits
-    for user in n_users:
-        body = (f"None of the features owned by {user} required Facility ID "
-                "edits. \N{party popper}")
-        mgmt.send_email(body, config.recipients[user])
-        log.info(f"Email sent to {user} recipients...")
-
-    # Step 6: Loop through all users that had edits performed
     scan_fails = identify.Identifier.failures
     edit_fails = edit.Edit.version_failures
     edit_counts = edit.Edit.edited_features
-    for user in e_users:
-        # Step 6a: Post edits or save layer files
-        user_versions = {k: v for k, v in versions.items() if user in k}
-        mgmt.post_and_save_layer_files(user, user_versions)
+    for user in identify.Identifier.inspected_users:
+        # Step 5a: Post edits or save layer files if they have edits
+        post = None
+        if user in e_users:
+            user_versions = {k: v for k, v in versions.items() if user in k}
+            mgmt.post_and_save_layer_files(user, user_versions)
+            post = [v["posted"] for v in user_versions.values()]
 
-        # Step 6b: Send an email with results
-        post = [v["posted"] for v in user_versions.values()]
+        # Step 5b: Send an email with results
         all_files = mgmt.list_files(['.csv', '.lyrx'])
         body, files = mgmt.email_matter(
-            user, post, all_files, scan_fails, edit_fails, edit_counts)
+            user, e_users, post, all_files, scan_fails, edit_fails,
+            edit_counts)
         mgmt.send_email(body, config.recipients[user], *files)
         log.info(f"Email sent to {user} recipients...")

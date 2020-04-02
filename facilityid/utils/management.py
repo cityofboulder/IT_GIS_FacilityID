@@ -328,9 +328,9 @@ def create_html_table(data: list) -> str:
     return table
 
 
-def email_matter(user: str, posted_successfully: list, attach_list: list,
-                 failed_inspection: list, failed_versioning: list,
-                 counts: list):
+def email_matter(user: str, edited_users: list, posted_successfully: list,
+                 attach_list: list, failed_inspection: list,
+                 failed_versioning: list, counts: list):
     """Defines the main body of the email sent at the end of the script,
     and also returns attachments
 
@@ -338,6 +338,8 @@ def email_matter(user: str, posted_successfully: list, attach_list: list,
     -----------
     user : str
         The data owner being emailed
+    edited_users : list
+        All users that had edits performed on data they owned
     posted_successfully : list
         A list of bools for whether all versions posted successfully
     attach_list : list
@@ -360,21 +362,25 @@ def email_matter(user: str, posted_successfully: list, attach_list: list,
     """
 
     attach = []
+    insert = ''
+    if user not in edited_users:
+        insert += (f"None of the features owned by {user} needed Facility ID "
+                   "edits. \N{party popper}")
     if user in config.versioned_edits:
         if posted_successfully and all(posted_successfully):
-            insert = ("Versioned edits to Facility IDs "
-                      "have been posted on your behalf."
-                      "\N{Fire} \N{Fire} \N{Fire}")
+            insert += ("Versioned edits to Facility IDs "
+                       "have been posted on your behalf."
+                       "\N{Fire} \N{Fire} \N{Fire}")
         else:
-            insert = ("Versioned edits were attempted on your behalf. Any "
-                      "versions that were not posted automatically are "
-                      "attached as one or more layer files. Open those layer "
-                      "files and reconcile/post the changes.")
-            attach = [x for x in attach_list if user in x and '.lyrx' in x]
+            insert += ("Versioned edits were attempted on your behalf. Any "
+                       "versions that were not posted automatically are "
+                       "attached as one or more layer files. Open those layer "
+                       "files and reconcile/post the changes.")
+            attach += [x for x in attach_list if user in x and '.lyrx' in x]
     else:
-        insert = ("You have not authorized versioned edits, but your data had "
-                  "irregular Facility IDs. Use the attached csv files to edit "
-                  "your data.")
+        insert += ("You have not authorized versioned edits, but your data "
+                   "had irregular Facility IDs. Use the attached csv files to "
+                   "edit your data.")
         attach = [x for x in attach_list if user in x and '.csv' in x]
 
     if counts:
@@ -390,10 +396,8 @@ def email_matter(user: str, posted_successfully: list, attach_list: list,
         user_fail = [x for x in failed_inspection if user in x["0 - Feature"]]
         if user_fail:
             insert += ("<br><br>"
-                       "The following features could not be scanned for "
-                       "incorrect Facility IDs. If you restore each feature "
-                       "based on the table below, Facility ID checks will be "
-                       "re-enabled."
+                       "Problems arose while attempting to scan the features "
+                       "listed below. Make the changes outlined in the table."
                        "<br><br>")
             insert += create_html_table(user_fail)
 
@@ -402,9 +406,7 @@ def email_matter(user: str, posted_successfully: list, attach_list: list,
         if user_fail:
             insert += ("<br><br>"
                        "The following features could not be edited in a "
-                       "version. If you restore each feature based on the "
-                       "table below, the layer will be eligible for versioned "
-                       "edits."
+                       "version. Make the changes below to fix this issue."
                        "<br><br>")
             insert += create_html_table(user_fail)
             attach += [x for x in attach_list if user in x and '.csv' in x]
