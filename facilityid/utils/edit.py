@@ -268,7 +268,7 @@ class Edit(Identifier):
 
             # ID EDITS
             # if not str_id or len(str_id) != len(str(int_id)):
-            if not str_id:
+            if not str_id or pfix != self.prefix:
                 new_id = self._new_id()
                 edit_row["FACILITYID"]["int_id"] = new_id
                 edit_row["FACILITYID"]["str_id"] = str(new_id)
