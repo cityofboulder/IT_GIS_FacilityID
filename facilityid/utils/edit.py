@@ -267,8 +267,11 @@ class Edit(Identifier):
                 edits = True
 
             # ID EDITS
+            # Edit ID if none exists or if the record has a prefix but it's
+            # the wrong prefix (This means a record with an ID but no prefix
+            # will not be assigned a new ID)
             # if not str_id or len(str_id) != len(str(int_id)):
-            if not str_id or pfix != self.prefix:
+            if not str_id or (pfix != self.prefix and pfix):
                 new_id = self._new_id()
                 edit_row["FACILITYID"]["int_id"] = new_id
                 edit_row["FACILITYID"]["str_id"] = str(new_id)
