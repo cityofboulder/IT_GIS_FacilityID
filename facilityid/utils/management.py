@@ -366,22 +366,24 @@ def email_matter(user: str, edited_users: list, posted_successfully: list,
     if user not in edited_users:
         insert += (f"None of the features owned by {user} needed Facility ID "
                    "edits. \N{party popper}")
-    if user in config.versioned_edits:
-        if posted_successfully and all(posted_successfully):
-            insert += ("Versioned edits to Facility IDs "
-                       "have been posted on your behalf."
-                       "\N{Fire} \N{Fire} \N{Fire}")
-        else:
-            insert += ("Versioned edits were attempted on your behalf. Any "
-                       "versions that were not posted automatically are "
-                       "attached as one or more layer files. Open those layer "
-                       "files and reconcile/post the changes.")
-            attach += [x for x in attach_list if user in x and '.lyrx' in x]
     else:
-        insert += ("You have not authorized versioned edits, but your data "
-                   "had irregular Facility IDs. Use the attached csv files to "
-                   "edit your data.")
-        attach = [x for x in attach_list if user in x and '.csv' in x]
+        if user in config.versioned_edits:
+            if posted_successfully and all(posted_successfully):
+                insert += ("Versioned edits to Facility IDs "
+                           "have been posted on your behalf."
+                           "\N{Fire} \N{Fire} \N{Fire}")
+            else:
+                insert += ("Versioned edits were attempted on your behalf. "
+                           "Any versions that were not posted automatically "
+                           "are attached as one or more layer files. Open "
+                           "those layer files and reconcile/post the changes.")
+                attach += [x for x in attach_list if user in x
+                           and '.lyrx' in x]
+        else:
+            insert += ("You have not authorized versioned edits, but your "
+                       "data had irregular Facility IDs. Use the attached csv "
+                       "files to edit your data.")
+            attach = [x for x in attach_list if user in x and '.csv' in x]
 
     if counts:
         user_counts = [x for x in counts if user in x["0 - Feature"]]
@@ -449,7 +451,7 @@ def email_matter(user: str, edited_users: list, posted_successfully: list,
 def send_email(body: str, recipients: list, *attachments):
     # from/to addresses
     sender = 'noreply@bouldercolorado.gov'
-    password = "3qIjkh1)vU"
+    password = decrypt("key", "token")
 
     # message
     msg = MIMEMultipart('alternative')
