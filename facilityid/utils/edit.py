@@ -1,6 +1,6 @@
 import os
 import shelve
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 
 import facilityid.config as config
 from arcpy import ClearWorkspaceCache_management
@@ -153,7 +153,7 @@ class Edit(Identifier):
 
         # Define date to replace Null values in the sort
         # Null values first, followed byt oldest to newest
-        _null_date = datetime(1400, 1, 1)
+        _null_date = datetime(1400, 1, 1, tzinfo=timezone.utc)
         geo = self.shapeType if self.datasetType == 'FeatureClass' else ''
 
         def geom_sorter(g):
