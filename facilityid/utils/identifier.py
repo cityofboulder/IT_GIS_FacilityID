@@ -208,8 +208,7 @@ class Identifier:
             result = execute_object.execute(query)
             globalids = ['{' + r[0] + '}' for r in result if r[1]]
             return globalids
-        except ExecuteError:
-            log.exception()
+        except (ExecuteError, TypeError):
             return list()
 
     def rows(self):
