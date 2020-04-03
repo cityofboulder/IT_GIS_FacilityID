@@ -193,7 +193,7 @@ class Identifier:
     def duplicates(self):
         # Initialize an executor object for SDE
         execute_object = ArcSDESQLExecute(self.connection)
-        query = f"""SELECT a.GLOBALID,
+        query = f"""SELECT CAST(a.GLOBALID as NVARCHAR(40)),
                            a.FACILITYID
                     FROM {self.database_name} a
                     INNER JOIN (
@@ -206,10 +206,10 @@ class Identifier:
 
         try:
             result = execute_object.execute(query)
-            globalids = [r[0] for r in result if r[1]]
+            globalids = ['{' + r[0] + '}' for r in result if r[1]]
             return globalids
-        except (ExecuteError, TypeError, AttributeError):
-            # TODO: Add logging
+        except ExecuteError:
+            log.exception()
             return list()
 
     def rows(self):
