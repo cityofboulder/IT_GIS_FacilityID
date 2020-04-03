@@ -31,7 +31,7 @@ class Identifier:
         self.name = self._name()
         self.database_name = self._database_name()
 
-        self.has_table = self.datasetType in ['FeatureClass', 'Table']
+        self.is_fc = self.datasetType == 'FeatureClass'
         self.fields = self._fields()
         self.has_facilityid = "FACILITYID" in self.fields
         self.has_globalid = "GLOBALID" in self.fields
@@ -160,7 +160,7 @@ class Identifier:
         """
 
         result = False  # Assume the layer will be skipped
-        if self.has_table:
+        if self.is_fc:
             if self.has_facilityid:
                 essentials = {"1 - Enable GLOBALIDs": self.has_globalid,
                               "2 - Enable Editor Tracking":
