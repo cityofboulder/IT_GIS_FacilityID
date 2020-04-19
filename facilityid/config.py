@@ -10,6 +10,7 @@ user_email = f"{username}@bouldercolorado.gov"
 
 with open(r'.\facilityid\config.yaml') as config_file:
     config = yaml.safe_load(config_file.read())
+    config['LOGGING']['handlers']['email']['toaddrs'] = user_email
     logging.config.dictConfig(config['LOGGING'])
 
 # Pro project location

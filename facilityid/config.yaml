@@ -87,7 +87,6 @@ LOGGING:
       class: logging.handlers.SMTPHandler
       mailhost: ["smtp.office365.com", 587]
       fromaddr: "noreply@bouldercolorado.gov"
-      toaddrs: ["nestj1@bouldercolorado.gov"]
       subject: "An error halted the FacilityID script"
       credentials: ["noreply@bouldercolorado.gov", "password"]
       secure: []
