@@ -117,10 +117,11 @@ class Identifier:
             try:
                 result = execute_object.execute(query)
                 return result[0][0]
-            except (ExecuteError, AttributeError):
+            except (ExecuteError, AttributeError, TypeError):
                 # AttributeError is raised when the regex expression inside
                 # the SQL statement fails to find the pattern, and a type
                 # other than sting is returned
+                # TypeError is raised when result is boolean
                 return None
         else:
             return None
