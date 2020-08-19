@@ -127,7 +127,7 @@ class Identifier:
         """Determines the field names in the table
         """
         try:
-            result = [f.name for f in ListFields(self.full_path)]
+            result = [f.name.upper() for f in ListFields(self.full_path)]
         # If a feature is a network dataset or topology, no fields exist
         # and a RuntimeError is raised
         except RuntimeError:
