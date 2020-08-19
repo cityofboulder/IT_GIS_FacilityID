@@ -293,8 +293,7 @@ class Identifier:
                      "INNER JOIN sys.database_principals AS P ON "
                      "P.principal_id = DP.grantee_principal_id "
                      "WHERE P.name='gisscr' "
-                     "AND state='G' "
-                     f"AND OBJECT_NAME(major_id) LIKE '{self.name}'")
+                     f"AND OBJECT_NAME(major_id) LIKE '{self.name}%'")
         execute_object = ArcSDESQLExecute(connection)
         result = execute_object.execute(query)
         editable = False  # Assume GISSCR user cannot edit by default
