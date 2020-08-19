@@ -109,6 +109,8 @@ class Identifier:
                          "PATINDEX('%[^a-zA-Z]%', FACILITYID)), "
                          "COUNT(*) "
                          f"FROM {self.database_name} "
+                         "WHERE SUBSTRING(FACILITYID, 0, "
+                         "PATINDEX('%[^a-zA-Z]%', FACILITYID)) IS NOT NULL "
                          "GROUP BY SUBSTRING(FACILITYID, 0, "
                          "PATINDEX('%[^a-zA-Z]%', FACILITYID)) "
                          "ORDER BY COUNT(*) DESC")
