@@ -353,15 +353,11 @@ class Edit(Identifier):
                     lyr.name = self.version_name
                     break
 
-        # Move into the group layer
-        try:
-            group_layer = user_map.listLayers(self.version_name)[0]
-            user_map.addLayerToGroup(group_layer, layer)
-            user_map.removeLayer(layer)
-            aprx.save()
-            layer = user_map.listLayers(self.feature_name)[0]
-        except IndexError:
-            log.exception(f"No group layer exists in the {self.owner} map...")
+        # Move the data layer into the group layer
+        group_layer = user_map.listLayers(self.version_name)[0]
+        user_map.addLayerToGroup(group_layer, layer)
+        user_map.removeLayer(layer)
+        aprx.save()
 
     def edit_version(self, connection_file: str):
 
