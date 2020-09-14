@@ -154,19 +154,19 @@ def reconcile_post(parent: str, version: str) -> dict:
 
     Returns
     -------
-    dict
-        A dictionary of version:(success/failure of version post) pairs
+    bool
+        Whether the reconcile/post process succeeded
     """
 
     post_kwargs = {"input_database": config.edit,
                    "reconcile_mode": "ALL_VERSIONS",
                    "target_version": parent,
                    "edit_versions": version,
-                   "abort_if_conflicts": True,
+                   "abort_if_conflicts": "ABORT_CONFLICTS",
                    "conflict_definition": "BY_OBJECT",
-                   "acquire_locks": True,
-                   "with_post": True,
-                   "with_delete": False}
+                   "acquire_locks": "LOCK_ACQUIRED",
+                   "with_post": "POST",
+                   "with_delete": "KEEP_VERSION"}
 
     try:
         log.info(f"Posting edits in {version} to {parent}...")
