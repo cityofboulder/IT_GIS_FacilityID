@@ -332,9 +332,9 @@ class Edit(Identifier):
         aprx = ArcGISProject(config.aprx)
         user_map = aprx.listMaps(f"{self.owner}")[0]
         user_map.addDataFromPath(self.aprx_connection)
-        for l in user_map.listLayers():
-            if self.feature_name in l.dataSource:
-                layer = l
+        for map_lyr in user_map.listLayers():
+            if self.feature_name in map_lyr.dataSource:
+                layer = map_lyr
                 break
         aprx.save()
 
