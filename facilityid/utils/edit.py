@@ -48,7 +48,7 @@ class Edit(Identifier):
         self.rows = self.rows()
         self.duplicates = self.duplicates()
         self.used = self._used()
-        self.unused = self._unused()
+        self.unused = self._unused() if config.recycle else None
 
     def __hash__(self):
         return hash(self.__key())
@@ -124,7 +124,7 @@ class Edit(Identifier):
             An integer number representing the next logical ID to assign
         """
 
-        if self.unused and config.recycle:
+        if self.unused:
             new_id = self.unused.pop()
         else:
             max_id = self.used[0] + 1
