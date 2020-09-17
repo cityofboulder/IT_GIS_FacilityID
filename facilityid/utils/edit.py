@@ -124,7 +124,7 @@ class Edit(Identifier):
             An integer number representing the next logical ID to assign
         """
 
-        if self.unused:
+        if self.unused and config.recycle:
             new_id = self.unused.pop()
         else:
             max_id = self.used[0] + 1
