@@ -2,6 +2,10 @@
 aprx: ".\\.esri\\EditMaps.aprx"
 template_lyr: ".\\.esri\\GroupLayerTemplate.lyrx"
 
+# Shall the script assign new ids with unused numbers between the min and
+# max ID (True), or shall it increment from the max (False)?
+recycle_ids: False
+
 # Database platform: ORACLE or SQL_SERVER?
 platform: "SQL_SERVER"
 

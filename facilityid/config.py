@@ -21,6 +21,9 @@ lyr = config["template_lyr"]
 db = config["platform"]
 database = config["DATABASES"][db]
 
+# Recycle IDs?
+recycle = config["recycle_ids"]
+
 # Database connections
 read = database["connections"]["read"]
 edit = database["connections"]["edit"]
