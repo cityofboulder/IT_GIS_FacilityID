@@ -30,7 +30,7 @@ single:
   SDE.DEFAULT:
     version_suffix: "_FacilityID"
     include: ["UTIL.", "TRANS.", "PW."]
-    exclude: []
+    exclude: ["WaterValveInspections"]
 multiple: 
   WEBEDITOR.Esri_Anonymous_util/BHSewer:
     version_suffix: "_BHSewerFacilityID"
@@ -134,7 +134,7 @@ DATABASES:
       token: "token"
     connections:
       read: "S:\\GIS\\Share\\DatabaseConnections\\SQLGISProd3\\gis on gisprod3.sde"
-      edit: "S:\\GIS\\Share\\DatabaseConnections\\SQLGISProd3\\gisscr on gisprod3.sde"
+      edit: "S:\\GIS\\Share\\DatabaseConnections\\SQLGISProd3\\secured_sde_files\\gisscr on gisprod3.sde"
     info:
       database_platform: "SQL_SERVER"
       instance: "GISData"
