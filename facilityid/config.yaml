@@ -54,7 +54,6 @@ recipients:
   UTIL: 
     - "nestlerj@bouldercolorado.gov"
     - "jeffreyb@bouldercolorado.gov"
-    - "salmone@bouldercolorado.gov"
   TRANS:
     - "nestlerj@bouldercolorado.gov"
     - "simpsonj@bouldercolorado.gov"
@@ -62,7 +61,6 @@ recipients:
   PW: 
     - "nestlerj@bouldercolorado.gov"
     - "jeffreyb@bouldercolorado.gov"
-    - "salmone@bouldercolorado.gov"
     - "simpsonj@bouldercolorado.gov"
     - "gregoryk@bouldercolorado.gov"
   PARKS: 
