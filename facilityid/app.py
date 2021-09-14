@@ -1,5 +1,3 @@
-import arcpy
-
 import facilityid.config as config
 import facilityid.utils.edit as edit
 import facilityid.utils.identifier as identify
@@ -14,7 +12,6 @@ def main():
 
     # Step 1: Delete all existing Facility ID versions and old files
     log.info("Deleting old Facility ID versions...")
-    arcpy.ClearWorkspaceCache_management()
     mgmt.delete_facilityid_versions(config.edit)
     exclude = ['AllEditsEver', 'GroupLayerTemplate']
     mgmt.list_files(['.sde', '.lyrx', '.csv'], exclude, True)

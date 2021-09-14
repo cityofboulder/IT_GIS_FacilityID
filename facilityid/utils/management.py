@@ -8,7 +8,8 @@ from email.mime.text import MIMEText
 from cryptography.fernet import Fernet
 
 import facilityid.config as config
-from arcpy import (CreateDatabaseConnection_management,
+from arcpy import (ClearWorkspaceCache_management,
+                   CreateDatabaseConnection_management,
                    CreateVersion_management, DeleteVersion_management,
                    ExecuteError, ListVersions, ReconcileVersions_management)
 from arcpy.da import Walk
@@ -16,6 +17,26 @@ from arcpy.mp import ArcGISProject
 
 # Initialize the logger for this file
 log = config.logging.getLogger(__name__)
+
+
+def clear_cache(func):
+    """Clears the workspace cache.
+
+    Used as a decorator on any function that deals with version management.
+    See this post for reasoning:
+    https://community.esri.com/t5/geoprocessing-questions/createversion-tool-doesn-t-like-my-workspace/m-p/733989#M24189
+
+    Parameters
+    ----------
+    func : function
+        The decorated function
+    """
+    def wrapper(*args, **kwargs):
+        log.debug("Clearing workspace cache...")
+        ClearWorkspaceCache_management()
+        value = func(*args, **kwargs)
+        return value
+    return wrapper
 
 
 def find_in_sde(sde_path: str, includes: list = [], excludes: list = []):
@@ -94,6 +115,7 @@ def decrypt(key, token):
     return decrypted.decode("utf-8")
 
 
+@clear_cache
 def versioned_connection(parent: str, version_name: str):
     """Create a version and associated versioned database connection.
 
@@ -142,6 +164,7 @@ def versioned_connection(parent: str, version_name: str):
     return full_conn_path
 
 
+@clear_cache
 def reconcile_post(parent: str, version: str) -> dict:
     """Reconciles a version. Posts the result to parent if configured.
 
@@ -177,6 +200,7 @@ def reconcile_post(parent: str, version: str) -> dict:
         return False
 
 
+@clear_cache
 def delete_facilityid_versions(connection: str) -> None:
     """Deletes versions created for editing Facility IDs
 
@@ -223,6 +247,7 @@ def save_layer_file(user: str, lyr_file_name: str):
     lyr.saveACopy(f".\\.esri\\{lyr_file_name}.lyrx")
 
 
+@clear_cache
 def post_and_save_layer_files(user: str, version_info: dict):
 
     for version, info in version_info.items():
