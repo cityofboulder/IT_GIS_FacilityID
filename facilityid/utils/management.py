@@ -247,7 +247,6 @@ def save_layer_file(user: str, lyr_file_name: str):
     lyr.saveACopy(f".\\.esri\\{lyr_file_name}.lyrx")
 
 
-@clear_cache
 def post_and_save_layer_files(user: str, version_info: dict):
 
     for version, info in version_info.items():
