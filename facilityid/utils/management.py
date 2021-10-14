@@ -5,7 +5,6 @@ from email import encoders
 from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from cryptography.fernet import Fernet
 
 import facilityid.config as config
 from arcpy import (ClearWorkspaceCache_management,
@@ -89,32 +88,6 @@ def find_in_sde(sde_path: str, includes: list = [], excludes: list = []):
     return items
 
 
-def decrypt(key, token):
-    """This function decrypts encrypted text back into plain text.
-
-    Parameters:
-    -----------
-    key : str
-        Encryption key
-    token : str
-        Encrypted text
-
-    Returns:
-    --------
-    str
-        Decrypted plain text
-    """
-
-    decrypted = ""
-    try:
-        f = Fernet(key)
-        decrypted = f.decrypt(bytes(token, 'utf-8'))
-    except Exception:
-        pass
-
-    return decrypted.decode("utf-8")
-
-
 @clear_cache
 def versioned_connection(parent: str, version_name: str):
     """Create a version and associated versioned database connection.
@@ -151,13 +124,11 @@ def versioned_connection(parent: str, version_name: str):
         CreateVersion_management(**version)
 
         # Create the database connection file
-        key = config.db_creds["key"]
-        token = config.db_creds["token"]
         log.debug(f"Creating a versioned db connection at {conn_file}...")
         connect = {"out_folder_path": ".\\.esri",
                    "out_name": f"{version_name}.sde",
                    "version": full_version_name,
-                   "password": decrypt(key, token),
+                   "password": config.db_password,
                    **config.db_params}
         CreateDatabaseConnection_management(**connect)
 
@@ -474,8 +445,8 @@ def email_matter(user: str, edited_users: list, posted_successfully: list,
 
 def send_email(body: str, recipients: list, *attachments):
     # from/to addresses
-    sender = 'noreply@bouldercolorado.gov'
-    password = decrypt("key", "token")
+    sender = config.no_reply
+    password = config.no_reply_password
 
     # message
     msg = MIMEMultipart('alternative')
