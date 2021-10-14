@@ -92,7 +92,6 @@ LOGGING:
       mailhost: ["smtp.office365.com", 587]
       fromaddr: "noreply@bouldercolorado.gov"
       subject: "An error halted the FacilityID script"
-      credentials: ["noreply@bouldercolorado.gov", "password"]
       secure: []
       level: ERROR
       formatter: only
@@ -116,9 +115,6 @@ LOGGING:
 # Database configurations
 DATABASES:
   ORACLE:
-    credentials:
-      key: "key"
-      token: "token"
     connections:
       read: "S:\\GIS\\Share\\DatabaseConnections\\gis on gisprod2.sde"
       edit: "S:\\PW\\PWShare\\GIS\\Scripts\\dbconnections\\gisscr on gisprod2.sde"
@@ -129,9 +125,6 @@ DATABASES:
       username: "gisscr"
       version_type: "TRANSACTIONAL"
   SQL_SERVER:
-    credentials:
-      key: "key"
-      token: "token"
     connections:
       read: "S:\\GIS\\Share\\DatabaseConnections\\SQLGISProd3\\gis on gisprod3.sde"
       edit: "S:\\GIS\\Share\\DatabaseConnections\\SQLGISProd3\\secured_sde_files\\gisscr on gisprod3.sde"
