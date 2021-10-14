@@ -2,6 +2,7 @@ import getpass
 import logging
 import logging.config
 import logging.handlers
+import os
 
 import yaml
 
@@ -25,8 +26,8 @@ database = config["DATABASES"][db]
 recycle = config["recycle_ids"]
 
 # Database connections
-read = database["connections"]["read"]
-edit = database["connections"]["edit"]
+read = os.path.realpath(database["connections"]["read"])
+edit = os.path.realpath(database["connections"]["edit"])
 
 # Database properties
 db_params = database["info"]
