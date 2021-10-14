@@ -30,7 +30,7 @@ single:
   SDE.DEFAULT:
     version_suffix: "_FacilityID"
     include: ["UTIL.", "TRANS.", "PW."]
-    exclude: ["WaterValveInspections"]
+    exclude: ["Inspection"]
 multiple: 
   WEBEDITOR.Esri_Anonymous_util/BHSewer:
     version_suffix: "_BHSewerFacilityID"
@@ -54,15 +54,17 @@ recipients:
   UTIL: 
     - "nestlerj@bouldercolorado.gov"
     - "jeffreyb@bouldercolorado.gov"
+    - "studebakers@bouldercolorado.gov"
   TRANS:
     - "nestlerj@bouldercolorado.gov"
     - "simpsonj@bouldercolorado.gov"
-    - "gregoryk@bouldercolorado.gov"
+    - "evanse@bouldercolorado.gov"
   PW: 
     - "nestlerj@bouldercolorado.gov"
     - "jeffreyb@bouldercolorado.gov"
     - "simpsonj@bouldercolorado.gov"
-    - "gregoryk@bouldercolorado.gov"
+    - "studebakers@bouldercolorado.gov"
+    - "evanse@bouldercolorado.gov"
   PARKS: 
     - "nestlerj@bouldercolorado.gov"
     - "spielmanc@bouldercolorado.gov"
