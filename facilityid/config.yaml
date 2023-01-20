@@ -13,13 +13,13 @@ platform: "SQL_SERVER"
 authorization:
   UTIL:
     versioned_edits: True
-    post_edits: False
+    post_edits: True
   TRANS:
     versioned_edits: True
-    post_edits: False
+    post_edits: True
   PW:
     versioned_edits: True
-    post_edits: False
+    post_edits: True
   PARKS:
     versioned_edits: False
     post_edits: False
@@ -51,22 +51,20 @@ multiple:
 
 # Email recipients for each database user
 recipients:
-  UTIL: 
-    - "nestlerj@bouldercolorado.gov"
+  UTIL:
     - "jeffreyb@bouldercolorado.gov"
     - "studebakers@bouldercolorado.gov"
+    - "johnsonm@bouldercolorado.gov"
   TRANS:
-    - "nestlerj@bouldercolorado.gov"
     - "simpsonj@bouldercolorado.gov"
     - "evanse@bouldercolorado.gov"
-  PW: 
-    - "nestlerj@bouldercolorado.gov"
+  PW:
     - "jeffreyb@bouldercolorado.gov"
     - "simpsonj@bouldercolorado.gov"
     - "studebakers@bouldercolorado.gov"
     - "evanse@bouldercolorado.gov"
-  PARKS: 
-    - "nestlerj@bouldercolorado.gov"
+    - "johnsonm@bouldercolorado.gov"
+  PARKS:
     - "spielmanc@bouldercolorado.gov"
 
 # Logging Configurations
