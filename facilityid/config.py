@@ -1,4 +1,3 @@
-import getpass
 import logging
 import logging.config
 import logging.handlers
@@ -33,10 +32,6 @@ def decrypt(key, token):
 
     return decrypted.decode("utf-8")
 
-
-username = getpass.getuser()
-user_email = f"{username}@bouldercolorado.gov"
-
 # Get credentials
 with open(r'.\facilityid\credentials.yaml') as cred_file:
     creds = yaml.safe_load(cred_file.read())
@@ -49,7 +44,6 @@ with open(r'.\facilityid\credentials.yaml') as cred_file:
 # Get configurations
 with open(r'.\facilityid\config.yaml') as config_file:
     config = yaml.safe_load(config_file.read())
-    config['LOGGING']['handlers']['email']['toaddrs'] = user_email
     config['LOGGING']['handlers']['email']['credentials'] = [
         no_reply,
         no_reply_password

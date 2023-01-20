@@ -89,6 +89,7 @@ LOGGING:
       class: logging.handlers.SMTPHandler
       mailhost: ["smtp.office365.com", 587]
       fromaddr: "noreply@bouldercolorado.gov"
+      toaddrs: "nestlerj@bouldercolorado.gov"
       subject: "An error halted the FacilityID script"
       secure: []
       level: ERROR
@@ -124,8 +125,8 @@ DATABASES:
       version_type: "TRANSACTIONAL"
   SQL_SERVER:
     connections:
-      read: "S:\\GIS\\Share\\DatabaseConnections\\SQLGISProd3\\gis on gisprod3.sde"
-      edit: "S:\\GIS\\Share\\DatabaseConnections\\SQLGISProd3\\secured_sde_files\\gisscr on gisprod3.sde"
+      read: "G:\ORADATA\GIS\DatabaseConnections\SqlServer\Prod3\gis on gisprod3.sde"
+      edit: "G:\ORADATA\GIS\DatabaseConnections\SqlServer\Prod3\gisscr on gisprod3.sde"
     info:
       database_platform: "SQL_SERVER"
       instance: "GISData"
