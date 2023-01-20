@@ -8,8 +8,6 @@ log = config.logging.getLogger(__name__)
 
 
 def main():
-    log.info(f"Started by {config.username}...")
-
     # Step 1: Delete all existing Facility ID versions and old files
     log.info("Deleting old Facility ID versions...")
     mgmt.delete_facilityid_versions(config.edit)
