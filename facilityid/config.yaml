@@ -125,8 +125,8 @@ DATABASES:
       version_type: "TRANSACTIONAL"
   SQL_SERVER:
     connections:
-      read: "G:\ORADATA\GIS\DatabaseConnections\SqlServer\Prod3\gis on gisprod3.sde"
-      edit: "G:\ORADATA\GIS\DatabaseConnections\SqlServer\Prod3\gisscr on gisprod3.sde"
+      read: "G:\\ORADATA\\GIS\\DatabaseConnections\\SqlServer\\Prod3\\gis on gisprod3.sde"
+      edit: "G:\\ORADATA\\GIS\\DatabaseConnections\\SqlServer\\Prod3\\gisscr on gisprod3.sde"
     info:
       database_platform: "SQL_SERVER"
       instance: "GISData"
