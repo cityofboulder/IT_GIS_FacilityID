@@ -13,13 +13,13 @@ platform: "SQL_SERVER"
 authorization:
   UTIL:
     versioned_edits: True
-    post_edits: True
+    post_edits: False
   TRANS:
     versioned_edits: True
-    post_edits: True
+    post_edits: False
   PW:
     versioned_edits: True
-    post_edits: True
+    post_edits: False
   PARKS:
     versioned_edits: False
     post_edits: False
@@ -52,18 +52,11 @@ multiple:
 # Email recipients for each database user
 recipients:
   UTIL:
-    - "jeffreyb@bouldercolorado.gov"
-    - "studebakers@bouldercolorado.gov"
-    - "johnsonm@bouldercolorado.gov"
+    - "pwgisinfores@bouldercolorado.gov"
   TRANS:
-    - "simpsonj@bouldercolorado.gov"
-    - "evanse@bouldercolorado.gov"
+    - "pwgisinfores@bouldercolorado.gov"
   PW:
-    - "jeffreyb@bouldercolorado.gov"
-    - "simpsonj@bouldercolorado.gov"
-    - "studebakers@bouldercolorado.gov"
-    - "evanse@bouldercolorado.gov"
-    - "johnsonm@bouldercolorado.gov"
+    - "pwgisinfores@bouldercolorado.gov"
   PARKS:
     - "spielmanc@bouldercolorado.gov"
 
@@ -88,7 +81,7 @@ LOGGING:
     email:
       class: logging.handlers.SMTPHandler
       mailhost: ["smtp.office365.com", 587]
-      fromaddr: "noreply@bouldercolorado.gov"
+      fromaddr: "noreply-gis@bouldercolorado.gov"
       toaddrs: "nestlerj@bouldercolorado.gov"
       subject: "An error halted the FacilityID script"
       secure: []
@@ -125,8 +118,8 @@ DATABASES:
       version_type: "TRANSACTIONAL"
   SQL_SERVER:
     connections:
-      read: "G:\\ORADATA\\GIS\\DatabaseConnections\\SqlServer\\Prod3\\gis on gisprod3.sde"
-      edit: "G:\\ORADATA\\GIS\\DatabaseConnections\\SqlServer\\Prod3\\gisscr on gisprod3.sde"
+      read: "\\\\filesrv15\\ShareDVolNS\\Dev\\Apps16\\ORADATA\\GIS\\DatabaseConnections\\SqlServer\\Prod3\\gis on gisprod3.sde"
+      edit: "\\\\filesrv15\\ShareDVolNS\\Dev\\Apps16\\ORADATA\\GIS\\DatabaseConnections\\SqlServer\\Prod3\\gisscr on gisprod3.sde"
     info:
       database_platform: "SQL_SERVER"
       instance: "GISData"
