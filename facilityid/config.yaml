@@ -21,7 +21,7 @@ authorization:
     versioned_edits: True
     post_edits: False
   PARKS:
-    versioned_edits: False
+    versioned_edits: True
     post_edits: False
 
 # Will edits all come from a single parent or multiple parents?
@@ -29,7 +29,7 @@ single_parent: True
 single:
   SDE.DEFAULT:
     version_suffix: "_FacilityID"
-    include: ["UTIL.", "TRANS.", "PW."]
+    include: ["UTIL.", "TRANS.", "PW.", "PARKS."]
     exclude: ["Inspection"]
 multiple: 
   WEBEDITOR.Esri_Anonymous_util/BHSewer:
@@ -58,7 +58,7 @@ recipients:
   PW:
     - "pwgisinfores@bouldercolorado.gov"
   PARKS:
-    - "spielmanc@bouldercolorado.gov"
+    - "jeffreyb@bouldercolorado.gov"
 
 # Logging Configurations
 LOGGING:
